@@ -190,6 +190,59 @@ c) Dados dos conjuntos finitos $A$ y $B$, dar fórmulas para los cardinales de l
 
 $$\{f : A \to B\} \quad \text{y} \quad \{f : A \to B \mid f \text{ es inyectiva}\}.$$
 
+### Resolución — Ejercicio 4
+
+**¿Por qué es interesante?** Pintar casas con o sin restricción de color distinto es exactamente la diferencia entre funciones cualquiera e inyectivas — el ítem c) lo formaliza.
+
+---
+
+**a) 10 casas, 23 colores**
+
+*Sin restricción:* cada casa elige libremente entre 23 colores (con repetición permitida).
+
+$$23^{10} = \boxed{41{,}426{,}511{,}213{,}649}$$
+
+*Con colores distintos:* la primera casa tiene 23 opciones, la segunda 22, ..., la décima 14. El orden importa (casa 1 ≠ casa 2).
+
+$$V(23,10) = \frac{23!}{13!} = 23 \times 22 \times 21 \times 20 \times 19 \times 18 \times 17 \times 16 \times 15 \times 14 = \boxed{4{,}151{,}586{,}700{,}800}$$
+
+---
+
+**b) Generalización: $k$ casas y $n$ colores**
+
+| Caso | Fórmula |
+|---|---|
+| Colores pueden repetirse | $n^k$ |
+| Colores todos distintos | $V(n,k) = \dfrac{n!}{(n-k)!}$ |
+
+Requisito para el segundo caso: $n \geq k$ (debe haber al menos tantos colores como casas).
+
+---
+
+**c) Funciones entre conjuntos finitos**
+
+Sea $|A| = k$ y $|B| = n$.
+
+**Todas las funciones $f: A \to B$:**
+
+Cada elemento de $A$ puede mapearse a cualquiera de los $n$ elementos de $B$, independientemente. Hay $k$ elementos en $A$, cada uno con $n$ opciones:
+
+$$|\{f : A \to B\}| = n^k$$
+
+Esto es exactamente el caso "casas con repetición": cada elemento de $A$ es una "casa" y cada elemento de $B$ es un "color".
+
+**Funciones inyectivas $f: A \to B$:**
+
+Cada elemento de $A$ debe mapearse a un elemento *distinto* de $B$. El primero tiene $n$ opciones, el segundo $n-1$, ..., el $k$-ésimo tiene $n-k+1$:
+
+$$|\{f : A \to B \mid f \text{ es inyectiva}\}| = \frac{n!}{(n-k)!} = V(n,k)$$
+
+Requiere $n \geq k$; si $n < k$ no existen funciones inyectivas.
+
+**Resumen unificado:**
+
+$$|\{f : A \to B\}| = |B|^{|A|} \qquad |\{f : A \to B \mid f \text{ inyectiva}\}| = \frac{|B|!}{(|B|-|A|)!}$$
+
 ---
 
 ## Ejercicio 5
