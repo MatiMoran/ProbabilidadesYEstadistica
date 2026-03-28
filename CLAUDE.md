@@ -27,3 +27,15 @@ Help resolve practical exercises (prácticas) using the theoretical material and
 - Use standard probability/statistics notation consistent with UBA course materials.
 - When a concept is needed, explain it briefly before applying it.
 - Answers should be in Spanish unless the user writes in English.
+
+## Exercise Solution Format
+
+Use this structure for every exercise solution:
+
+1. **¿Por qué es interesante/paradójico?** — Identify and dismantle the wrong intuition before calculating. Explain what makes the problem surprising or tricky.
+2. **Idea clave** — Name the resolution strategy explicitly (complement, conditional probability, linearity of expectation, etc.) before applying it.
+3. **Resolución paso a paso** — Build the solution one step at a time, justifying each step. Do not jump directly to the general formula.
+4. **Fórmulas en LaTeX** — All mathematical expressions must use LaTeX (`$...$` inline or `$$...$$` for blocks). Never write formulas as plain text.
+5. **Resultado destacado** — Highlight the final result clearly (e.g. with `\boxed{}`).
+6. **Tabla o ejemplos numéricos** — When useful, include a table of values to consolidate intuition or show how the result varies.
+7. **Generalización** — Close with the general formula or idea when the problem is a special case of something broader.

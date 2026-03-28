@@ -107,6 +107,83 @@ Para el año estándar, $d = 365$.
 **Ejercicio 2. (Monty Hall)**
 En un concurso se te ofrece escoger entre tres puertas: detrás de una de ellas hay un auto y detrás de las otras cabras. Elegís una puerta y luego el presentador, que sabe lo que hay detrás de las puertas, abre otra mostrando una cabra. Entonces te pregunta: "¿Querés cambiar tu elección?" ¿Qué debes hacer?
 
+### Solución
+
+#### ¿Por qué es una paradoja?
+
+La intuición dice: quedan dos puertas, una tiene el auto y la otra una cabra, así que es $50/50$. Cambiar o quedarse da lo mismo.
+
+Esta intuición es **incorrecta**. La clave que la rompe es que el presentador **no abre una puerta al azar** — él *sabe* dónde está el auto y *siempre* abre una puerta con cabra. Esa acción no es neutra: transmite información que redistribuye las probabilidades.
+
+---
+
+#### Idea clave: el presentador no es aleatorio
+
+La acción del presentador está **condicionada** por tu elección inicial y por dónde está el auto. Esto es lo que hace que las probabilidades no sean simétricas.
+
+La forma más directa de verlo es analizar los dos únicos escenarios posibles al momento de elegir.
+
+---
+
+#### Resolución paso a paso
+
+Supongamos sin pérdida de generalidad que elegiste la **puerta 1**.
+
+**Escenario A — elegiste la puerta con el auto** (probabilidad $\frac{1}{3}$)
+
+El auto está detrás de la puerta 1. El presentador puede abrir cualquiera de las otras dos (ambas tienen cabras). Si **cambiás**, perdés.
+
+**Escenario B — elegiste una puerta con cabra** (probabilidad $\frac{2}{3}$)
+
+El auto está detrás de la puerta 2 o la 3 (una de ellas). El presentador **no tiene opción**: debe abrir la única puerta restante con cabra. Si **cambiás**, ganás.
+
+**Tabla resumen:**
+
+| Situación inicial | Probabilidad | ¿Qué pasa si cambiás? |
+|:---|:---:|:---:|
+| Elegiste el auto | $\dfrac{1}{3}$ | Perdés |
+| Elegiste una cabra | $\dfrac{2}{3}$ | Ganás |
+
+Por lo tanto:
+
+$$\boxed{P(\text{ganar cambiando}) = \frac{2}{3}, \qquad P(\text{ganar quedándote}) = \frac{1}{3}}$$
+
+**Siempre conviene cambiar.**
+
+---
+
+#### Verificación con Bayes (opcional)
+
+Para quien quiera verlo formalmente. Llamemos:
+- $A_i$ = "el auto está detrás de la puerta $i$", con $P(A_i) = \frac{1}{3}$
+- $H_3$ = "el presentador abre la puerta 3" (el caso simétrico para puerta 2 es idéntico)
+
+Habiendo elegido la puerta 1, la probabilidad de que el presentador abra la puerta 3 en cada escenario es:
+
+$$P(H_3 \mid A_1) = \frac{1}{2}, \quad P(H_3 \mid A_2) = 1, \quad P(H_3 \mid A_3) = 0$$
+
+La primera es $\frac{1}{2}$ porque si el auto está en puerta 1, el presentador elige al azar entre 2 y 3. La segunda es 1 porque si el auto está en puerta 2, la única opción es abrir la 3. La tercera es 0 porque no puede revelar el auto.
+
+Por la regla de la probabilidad total:
+
+$$P(H_3) = \frac{1}{2} \cdot \frac{1}{3} + 1 \cdot \frac{1}{3} + 0 \cdot \frac{1}{3} = \frac{1}{6} + \frac{1}{3} = \frac{1}{2}$$
+
+Aplicando Bayes:
+
+$$P(A_1 \mid H_3) = \frac{P(H_3 \mid A_1)\,P(A_1)}{P(H_3)} = \frac{\frac{1}{2} \cdot \frac{1}{3}}{\frac{1}{2}} = \frac{1}{3}$$
+
+$$P(A_2 \mid H_3) = \frac{P(H_3 \mid A_2)\,P(A_2)}{P(H_3)} = \frac{1 \cdot \frac{1}{3}}{\frac{1}{2}} = \frac{2}{3}$$
+
+Tras ver que el presentador abrió la puerta 3: la probabilidad de que el auto esté en la puerta 1 (tu elección) sigue siendo $\frac{1}{3}$, y la probabilidad de que esté en la puerta 2 (la alternativa) es $\frac{2}{3}$.
+
+---
+
+#### Analogía para fijar la intuición
+
+Imaginá que en vez de 3 puertas hay **1000 puertas**. Elegís una al azar. El presentador abre 998 puertas con cabras y te deja solo la tuya y una más. ¿Cambiás?
+
+Casi seguro que tu puerta original era una cabra — la elegiste entre 1000. El presentador concentró toda la "información" del auto en la puerta que no abrió. En este caso extremo nadie dudaría en cambiar. El problema original con 3 puertas es exactamente el mismo principio, solo que menos dramático.
+
 ---
 
 **Ejercicio 3. (Coleccionista de cupones)**
