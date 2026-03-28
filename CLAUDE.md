@@ -28,6 +28,20 @@ Help resolve practical exercises (prácticas) using the theoretical material and
 - When a concept is needed, explain it briefly before applying it.
 - Answers should be in Spanish unless the user writes in English.
 
+## PDF to Markdown Conversion
+
+When asked to parse a PDF and generate a Markdown file:
+
+- Use the `Read` tool directly on the `.pdf` file — it supports PDFs natively (no Python or external tools needed).
+- Save the output as a `.md` file in the same directory as the PDF, with the same base name.
+- Preserve all text exactly as it appears in the PDF (Spanish included).
+- Convert all mathematical expressions to LaTeX: `$...$` for inline, `$$...$$` for display blocks.
+- Use `\binom{n}{k}` for binomial coefficients, `\sum`, `\prod`, `\frac`, etc. for standard notation.
+- Use `##` headers for each exercise (e.g. `## Ejercicio 1`).
+- Use lettered sub-lists (`a)`, `b)`, ...) for sub-items, matching the original structure.
+- For figures or diagrams described in the PDF, add a brief italicized description in parentheses since images cannot be embedded.
+- Do not add solutions, explanations, or extra content — only transcribe what is in the PDF.
+
 ## Exercise Solution Format
 
 Use this structure for every exercise solution:
