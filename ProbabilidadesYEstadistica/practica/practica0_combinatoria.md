@@ -257,6 +257,93 @@ d) ¿Y con la condición de que las dos A no estén juntas?
 
 e) ¿Y con la condición de que todas las vocales estén juntas?
 
+### Resolución — Ejercicio 5
+
+**Análisis de BIBLIOTECARIA**
+
+Primero contamos las letras (13 en total):
+
+| Letra | Cantidad |
+|---|---|
+| B | 2 |
+| I | 3 |
+| L | 1 |
+| O | 1 |
+| T | 1 |
+| E | 1 |
+| C | 1 |
+| A | 2 |
+| R | 1 |
+| **Total** | **13** |
+
+Vocales: I(3), O(1), E(1), A(2) → 7 vocales. Consonantes: B(2), L, T, C, R → 6 consonantes.
+
+---
+
+**a) Total de anagramas**
+
+**Idea clave:** permutaciones con elementos repetidos. Si todas las letras fueran distintas habría $13!$ anagramas, pero hay letras repetidas (B×2, I×3, A×2) que generan arreglos idénticos.
+
+$$\frac{13!}{2! \cdot 3! \cdot 2!} = \frac{6{,}227{,}020{,}800}{2 \cdot 6 \cdot 2} = \frac{6{,}227{,}020{,}800}{24} = \boxed{259{,}459{,}200}$$
+
+---
+
+**b) T a la derecha de C**
+
+**Idea clave:** simetría. En cualquier anagrama, T y C ocupan 2 posiciones. Por simetría exactamente la mitad de los arreglos tiene T a la derecha de C (y la otra mitad a la izquierda). Como T y C son letras únicas, no hay casos de empate.
+
+$$\frac{259{,}459{,}200}{2} = \boxed{129{,}729{,}600}$$
+
+---
+
+**c) T a la derecha de C, y C a la derecha de R**
+
+**Idea clave:** misma simetría extendida. Las 3 letras T, C, R tienen $3! = 6$ ordenamientos relativos posibles, todos igualmente probables. Solo 1 de esos 6 cumple R < C < T (en posición de izquierda a derecha).
+
+$$\frac{259{,}459{,}200}{6} = \boxed{43{,}243{,}200}$$
+
+---
+
+**d) Las dos A no estén juntas**
+
+**Idea clave:** complemento. Es más fácil contar los anagramas donde las dos A *sí* están juntas y restarlos del total.
+
+*Anagramas con las dos A juntas:* tratamos "AA" como un único bloque. Quedan 12 elementos: el bloque AA + B,B,I,I,I,L,O,T,E,C,R.
+
+$$\text{Con AA juntas} = \frac{12!}{2! \cdot 3!} = \frac{479{,}001{,}600}{12} = 39{,}916{,}800$$
+
+$$\text{Con A separadas} = 259{,}459{,}200 - 39{,}916{,}800 = \boxed{219{,}542{,}400}$$
+
+---
+
+**e) Todas las vocales juntas**
+
+**Idea clave:** bloque de vocales. Agrupamos las 7 vocales (I,I,I,O,E,A,A) en un único bloque. Entonces tenemos 7 elementos para permutar: el bloque + B,B,L,T,C,R.
+
+*Arreglos del bloque externo* (7 elementos, B repetida 2 veces):
+
+$$\frac{7!}{2!} = \frac{5040}{2} = 2520$$
+
+*Arreglos internos del bloque de vocales* (7 vocales: I×3, O×1, E×1, A×2):
+
+$$\frac{7!}{3! \cdot 2!} = \frac{5040}{12} = 420$$
+
+*Total:*
+
+$$2520 \times 420 = \boxed{1{,}058{,}400}$$
+
+---
+
+**Tabla resumen**
+
+| Ítem | Condición | Resultado |
+|---|---|---|
+| a) | Sin restricción | 259,459,200 |
+| b) | T a la derecha de C | 129,729,600 |
+| c) | R < C < T (izq. a der.) | 43,243,200 |
+| d) | Las dos A separadas | 219,542,400 |
+| e) | Todas las vocales juntas | 1,058,400 |
+
 ---
 
 ## Ejercicio 6
@@ -269,6 +356,46 @@ b) las bolillas se extraen una a la vez y se devuelven a la caja después de ext
 
 c) las bolillas se extraen todas juntas?
 
+### Resolución — Ejercicio 6
+
+**¿Por qué es interesante?** Los tres ítems son variaciones del mismo experimento pero con distintas reglas sobre orden y repetición — exactamente la tabla del Ejercicio 1.
+
+---
+
+**a) Una a la vez, sin devolución — variaciones sin repetición**
+
+El orden importa (la secuencia de extracción es el resultado) y no hay repetición (la bolilla descartada no vuelve).
+
+$$V(123, 5) = \frac{123!}{118!} = 123 \times 122 \times 121 \times 120 \times 119 = \boxed{25{,}563{,}645{,}480}$$
+
+---
+
+**b) Una a la vez, con devolución — variaciones con repetición**
+
+El orden importa y hay repetición (la misma bolilla puede salir más de una vez).
+
+$$123^5 = \boxed{28{,}153{,}056{,}843}$$
+
+---
+
+**c) Todas juntas — combinaciones**
+
+El orden no importa (sacar {3, 17, 42, 80, 99} es el mismo resultado sin importar el orden). Sin repetición.
+
+$$\binom{123}{5} = \frac{123!}{5!\,118!} = \frac{25{,}563{,}645{,}480}{120} = \boxed{213{,}030{,}379}$$
+
+---
+
+**Tabla resumen**
+
+| Ítem | ¿Orden importa? | ¿Repetición? | Fórmula | Resultado |
+|---|---|---|---|---|
+| a) | Sí | No | $V(123,5) = \frac{123!}{118!}$ | 25,563,645,480 |
+| b) | Sí | Sí | $123^5$ | 28,153,056,843 |
+| c) | No | No | $\binom{123}{5}$ | 213,030,379 |
+
+Notar que $\binom{123}{5} = \frac{V(123,5)}{5!}$: las combinaciones surgen de tomar las variaciones sin repetición y eliminar los $5!$ ordenamientos de cada grupo.
+
 ---
 
 ## Ejercicio 7
@@ -276,6 +403,55 @@ c) las bolillas se extraen todas juntas?
 En el tablero de la figura, ¿cuántas formas hay de llegar desde $A$ hasta $B$ realizando movimientos hacia abajo y hacia la derecha siguiendo las líneas? ¿Cuántos de esos caminos pasan por $X$? Generalizar para un tablero de tamaño $n \times m$.
 
 *(El tablero tiene a $A$ en la esquina superior izquierda, $B$ en la esquina inferior derecha, y $X$ en una posición intermedia.)*
+
+### Resolución — Ejercicio 7
+
+**¿Por qué es interesante?** A primera vista parece un problema de caminos, pero la clave es que cada camino es exactamente una secuencia de movimientos D (derecha) y B (abajo) — y contar esas secuencias es un problema de combinatoria pura.
+
+---
+
+**Caminos de A a B en un tablero $n \times m$**
+
+Un tablero de $n \times m$ casillas tiene $(n+1)$ filas y $(m+1)$ columnas de intersecciones. Para ir de la esquina superior izquierda a la inferior derecha moviéndose solo hacia abajo o hacia la derecha, todo camino consiste en exactamente:
+
+- $n$ movimientos hacia abajo (**↓**)
+- $m$ movimientos hacia la derecha (**→**)
+
+en algún orden, para un total de $n + m$ movimientos.
+
+**Idea clave:** cada camino es una secuencia de $n+m$ pasos donde elegimos cuáles $n$ son "abajo" (los $m$ restantes son "derecha" automáticamente).
+
+$$\text{Caminos}(A \to B) = \binom{n+m}{n} = \binom{n+m}{m}$$
+
+---
+
+**Caminos que pasan por X**
+
+Sea $X$ una intersección ubicada a $i$ pasos abajo y $j$ pasos a la derecha de $A$. Entonces $X$ está a $n-i$ pasos abajo y $m-j$ pasos a la derecha de $B$.
+
+**Idea clave:** multiplicar caminos independientes. Todo camino $A \to B$ que pasa por $X$ se descompone en un camino $A \to X$ seguido de un camino $X \to B$.
+
+$$\text{Caminos}(A \to X) = \binom{i+j}{i}, \qquad \text{Caminos}(X \to B) = \binom{(n-i)+(m-j)}{n-i}$$
+
+$$\text{Caminos que pasan por } X = \binom{i+j}{i} \cdot \binom{(n-i)+(m-j)}{n-i}$$
+
+---
+
+**Ejemplo concreto con la figura del enunciado**
+
+Del PDF, el tablero es de $4 \times 7$ casillas ($4$ filas, $7$ columnas), y $X$ está a $2$ pasos abajo y $3$ a la derecha de $A$:
+
+$$\text{Total } A \to B = \binom{4+7}{4} = \binom{11}{4} = 330$$
+
+$$\text{Caminos por } X = \binom{2+3}{2} \cdot \binom{2+4}{2} = \binom{5}{2} \cdot \binom{6}{2} = 10 \cdot 15 = 150$$
+
+---
+
+**Generalización**
+
+Para un tablero de $n \times m$ casillas con $X$ en la posición $(i, j)$ desde $A$:
+
+$$\boxed{\text{Total} = \binom{n+m}{n}, \qquad \text{Por } X = \binom{i+j}{i}\cdot\binom{(n-i)+(m-j)}{n-i}}$$
 
 ---
 
@@ -287,11 +463,97 @@ b) ¿De cuántas formas distintas pueden distribuirse 12 bolitas indistinguibles
 
 c) Generalizar el ítem anterior para $B$ bolitas y $C$ cajas.
 
+### Resolución — Ejercicio 8
+
+**¿Por qué es interesante?** Este ejercicio introduce las **combinaciones con repetición** (el cuarto caso de la tabla de conteo), que es el más contraintuitivo: elegir sin orden y con repetición.
+
+---
+
+**Idea clave: estrellas y barras**
+
+Distribuir $B$ objetos indistinguibles en $C$ cajas distinguibles es equivalente a colocar $B$ estrellas (★) separadas por $C-1$ barras (|). Cada configuración de estrellas y barras representa una distribución.
+
+Ejemplo con 5 bolitas en 3 cajas: `★★|★|★★` significa 2 en caja 1, 1 en caja 2, 2 en caja 3.
+
+Hay $B + C - 1$ símbolos en total, y hay que elegir cuáles $C-1$ son barras (o equivalentemente, cuáles $B$ son estrellas):
+
+$$\binom{B + C - 1}{C - 1} = \binom{B + C - 1}{B}$$
+
+---
+
+**a) Docenas en una panadería con 17 variedades**
+
+Elegir 12 facturas de 17 variedades, sin importar el orden y con repetición permitida (podés elegir varias de la misma variedad). Es el caso "orden no importa, con repetición":
+
+$$\binom{12 + 17 - 1}{17 - 1} = \binom{28}{16} = \binom{28}{12} = \boxed{3{,}108{,}105}$$
+
+---
+
+**b) 12 bolitas en 17 cajas**
+
+*Bolitas indistinguibles:* igual que las docenas — distribuir 12 objetos iguales en 17 cajas distintas.
+
+$$\binom{12 + 17 - 1}{17 - 1} = \binom{28}{16} = \boxed{3{,}108{,}105}$$
+
+*Bolitas distinguibles:* ahora cada bolita elige independientemente en cuál de las 17 cajas va. Son 12 decisiones independientes con 17 opciones cada una.
+
+$$17^{12} = \boxed{582{,}622{,}237{,}229{,}761}$$
+
+---
+
+**c) Generalización: $B$ bolitas y $C$ cajas**
+
+| Bolitas | Fórmula | Nombre |
+|---|---|---|
+| Indistinguibles | $\dbinom{B+C-1}{C-1}$ | Combinaciones con repetición |
+| Distinguibles | $C^B$ | Variaciones con repetición |
+
+$$\boxed{\binom{B+C-1}{B} \quad \text{(indistinguibles)} \qquad C^B \quad \text{(distinguibles)}}$$
+
+---
+
+**Tabla de los 4 casos de conteo — completa**
+
+| | Sin repetición | Con repetición |
+|---|---|---|
+| **Orden importa** | $\dfrac{n!}{(n-k)!}$ | $n^k$ |
+| **Orden no importa** | $\dbinom{n}{k}$ | $\dbinom{n+k-1}{k}$ |
+
+El ítem b) con bolitas distinguibles completa la celda (orden importa, con repetición) del Ejercicio 1.
+
 ---
 
 ## Ejercicio 9
 
 Se extraen 23 bolitas de una caja que contiene 100 bolitas blancas, 100 bolitas azules, 100 bolitas negras y 100 bolitas rojas. ¿Cuántos resultados posibles hay?
+
+### Resolución — Ejercicio 9
+
+**¿Por qué es interesante?** La trampa está en que hay 400 bolitas en total, pero todas las del mismo color son indistinguibles entre sí. El resultado no es "qué bolitas exactas salieron" sino "cuántas de cada color salieron".
+
+---
+
+**Idea clave:** el resultado de la extracción queda completamente determinado por cuántas bolitas de cada color se obtuvieron. Si salen $b$ blancas, $a$ azules, $n$ negras y $r$ rojas, entonces:
+
+$$b + a + n + r = 23, \qquad b, a, n, r \geq 0$$
+
+Contar los resultados posibles es exactamente contar las soluciones enteras no negativas de esta ecuación — un problema de estrellas y barras con 23 "unidades" distribuidas en 4 "cajas" (colores).
+
+$$\binom{23 + 4 - 1}{4 - 1} = \binom{26}{3} = \frac{26 \times 25 \times 24}{6} = \boxed{2{,}600}$$
+
+---
+
+**¿Por qué no importa que haya 100 de cada color?**
+
+Porque $23 \leq 100$: nunca podemos agotar un color, así que la restricción de 100 por color nunca se activa. Si hubiera, por ejemplo, solo 5 bolitas rojas, habría que restar los casos con $r > 5$ (inclusión-exclusión).
+
+---
+
+**Generalización**
+
+Extraer $k$ bolitas de una urna con $C$ colores (suficientes de cada uno):
+
+$$\binom{k + C - 1}{C - 1}$$
 
 ---
 
@@ -303,6 +565,42 @@ a) ¿Cuántas soluciones enteras no negativas tiene?
 
 b) ¿Cuántas soluciones enteras positivas tiene?
 
+### Resolución — Ejercicio 10
+
+**Idea clave:** estrellas y barras. Contar soluciones enteras de $x_1 + x_2 + x_3 = 57$ es exactamente distribuir 57 unidades en 3 variables.
+
+---
+
+**a) Soluciones enteras no negativas ($x_i \geq 0$)**
+
+Distribuir 57 unidades en 3 cajas sin restricción de mínimo:
+
+$$\binom{57 + 3 - 1}{3 - 1} = \binom{59}{2} = \frac{59 \times 58}{2} = \boxed{1{,}711}$$
+
+---
+
+**b) Soluciones enteras positivas ($x_i \geq 1$)**
+
+**Idea clave:** cambio de variable. Si cada $x_i \geq 1$, definimos $y_i = x_i - 1 \geq 0$. La ecuación se convierte en:
+
+$$(y_1 + 1) + (y_2 + 1) + (y_3 + 1) = 57 \implies y_1 + y_2 + y_3 = 54$$
+
+Ahora aplicamos estrellas y barras con $y_i \geq 0$:
+
+$$\binom{54 + 3 - 1}{3 - 1} = \binom{56}{2} = \frac{56 \times 55}{2} = \boxed{1{,}540}$$
+
+---
+
+**Generalización**
+
+Para $x_1 + x_2 + \cdots + x_k = n$:
+
+| Restricción | Sustitución | Fórmula |
+|---|---|---|
+| $x_i \geq 0$ | — | $\dbinom{n+k-1}{k-1}$ |
+| $x_i \geq 1$ | $y_i = x_i - 1$ | $\dbinom{n-1}{k-1}$ |
+| $x_i \geq c$ | $y_i = x_i - c$ | $\dbinom{n - ck + k - 1}{k-1}$ |
+
 ---
 
 ## Ejercicio 11
@@ -313,6 +611,70 @@ a) $$\sum_{i=0}^{n} \binom{n}{i} = 2^n.$$
 
 b) $$\sum_{i=1}^{n-1} i(n-i) = \sum_{i=2}^{n} \binom{i}{2} = \binom{n+1}{3}.$$
 
+### Resolución — Ejercicio 11
+
+El método es **contar el mismo conjunto de dos maneras** y concluir que las dos expresiones son iguales.
+
+---
+
+**a) $\displaystyle\sum_{i=0}^{n} \binom{n}{i} = 2^n$**
+
+**Conjunto a contar:** todos los subconjuntos de un conjunto $S$ con $n$ elementos.
+
+**Manera 1 — por tamaño:** los subconjuntos de tamaño $i$ son $\binom{n}{i}$. Sumando sobre todos los tamaños posibles:
+
+$$\sum_{i=0}^{n} \binom{n}{i}$$
+
+**Manera 2 — elemento por elemento:** para construir un subconjunto, cada uno de los $n$ elementos tiene 2 opciones independientes: está o no está. En total:
+
+$$2^n$$
+
+Como ambas cuentan lo mismo: $\displaystyle\sum_{i=0}^{n} \binom{n}{i} = 2^n$. $\blacksquare$
+
+---
+
+**b) $\displaystyle\sum_{i=1}^{n-1} i(n-i) = \sum_{i=2}^{n} \binom{i}{2} = \binom{n+1}{3}$**
+
+Probamos cada igualdad contando el mismo conjunto.
+
+**Conjunto a contar:** subconjuntos de 3 elementos de $\{1, 2, \ldots, n+1\}$. Hay $\binom{n+1}{3}$ de ellos.
+
+---
+
+**$\binom{n+1}{3} = \displaystyle\sum_{i=2}^{n} \binom{i}{2}$**
+
+**Idea:** fijar el elemento mayor del subconjunto. Si el mayor es $k+1$ (con $k$ entre 2 y $n$), los otros 2 elementos se eligen libremente de $\{1, \ldots, k\}$:
+
+$$\binom{n+1}{3} = \sum_{k=2}^{n} \binom{k}{2}$$
+
+que es exactamente $\sum_{i=2}^{n} \binom{i}{2}$ renombrando $k = i$. $\blacksquare$
+
+Esta es la **identidad del palo de hockey** (hockey stick identity):
+
+$$\sum_{i=r}^{n} \binom{i}{r} = \binom{n+1}{r+1}$$
+
+---
+
+**$\displaystyle\sum_{i=1}^{n-1} i(n-i) = \binom{n+1}{3}$**
+
+**Idea:** contar subconjuntos $\{a, b, c\} \subseteq \{1,\ldots,n+1\}$ con $a < b < c$ fijando el elemento del medio $b$.
+
+Si $b = i+1$ (con $i$ entre 1 y $n-1$):
+- $a$ puede ser cualquiera de los $i$ elementos menores que $b$: $i$ opciones.
+- $c$ puede ser cualquiera de los $n+1-(i+1) = n-i$ elementos mayores que $b$: $n-i$ opciones.
+
+$$\binom{n+1}{3} = \sum_{i=1}^{n-1} i(n-i) \qquad \blacksquare$$
+
+---
+
+**Verificación numérica con $n = 4$**
+
+$$\binom{5}{3} = 10$$
+
+$$\sum_{i=1}^{3} i(4-i) = 1\cdot3 + 2\cdot2 + 3\cdot1 = 3+4+3 = 10 \checkmark$$
+
+$$\sum_{i=2}^{4} \binom{i}{2} = \binom{2}{2}+\binom{3}{2}+\binom{4}{2} = 1+3+6 = 10 \checkmark$$
+
 ---
 
 ## Ejercicio 12
@@ -320,3 +682,68 @@ b) $$\sum_{i=1}^{n-1} i(n-i) = \sum_{i=2}^{n} \binom{i}{2} = \binom{n+1}{3}.$$
 Probar que un conjunto no vacío tiene igual cantidad de subconjuntos de cardinal par que de cardinal impar. Deducir que si $n \neq 0$:
 
 $$\sum_{i=0}^{n} (-1)^i \binom{n}{i} = 0.$$
+
+### Resolución — Ejercicio 12
+
+**¿Por qué es interesante?** La sumatoria $\sum(-1)^i\binom{n}{i}$ parece algebraica, pero se puede probar combinatoriamente sin manipular polinomios, entendiendo qué significa el signo $(-1)^i$.
+
+---
+
+**Parte 1: igual cantidad de subconjuntos pares e impares**
+
+Sea $S$ un conjunto no vacío con $n \geq 1$ elementos. Fijemos un elemento distinguido $s \in S$.
+
+**Idea clave:** construir una biyección entre subconjuntos de cardinal par y subconjuntos de cardinal impar. La biyección es: dado cualquier subconjunto $A \subseteq S$, definimos
+
+$$f(A) = \begin{cases} A \setminus \{s\} & \text{si } s \in A \\ A \cup \{s\} & \text{si } s \notin A \end{cases}$$
+
+Es decir, $f$ agrega $s$ si no está, o lo quita si está. Esta operación:
+- Es una involución: $f(f(A)) = A$.
+- Cambia la paridad del cardinal: si $|A|$ es par, $|f(A)|$ es impar, y viceversa.
+
+Como $f$ es una biyección entre los dos conjuntos, tienen el mismo cardinal. $\blacksquare$
+
+---
+
+**Parte 2: deducir $\displaystyle\sum_{i=0}^{n}(-1)^i\binom{n}{i} = 0$**
+
+Los subconjuntos de cardinal par son los de tamaño $0, 2, 4, \ldots$, que suman:
+
+$$\#\{\text{subconj. pares}\} = \sum_{\substack{i=0 \\ i \text{ par}}}^{n} \binom{n}{i}$$
+
+Los de cardinal impar:
+
+$$\#\{\text{subconj. impares}\} = \sum_{\substack{i=0 \\ i \text{ impar}}}^{n} \binom{n}{i}$$
+
+Como son iguales, su diferencia es cero:
+
+$$\sum_{\substack{i \text{ par}}} \binom{n}{i} - \sum_{\substack{i \text{ impar}}} \binom{n}{i} = 0$$
+
+Esto es exactamente $\displaystyle\sum_{i=0}^{n} (-1)^i \binom{n}{i} = 0$, ya que $(-1)^i = +1$ para $i$ par y $(-1)^i = -1$ para $i$ impar. $\blacksquare$
+
+---
+
+**Verificación numérica con $n = 3$**
+
+Subconjuntos de $\{1,2,3\}$:
+
+| Cardinal | Subconjuntos | Cantidad |
+|---|---|---|
+| 0 (par) | $\emptyset$ | 1 |
+| 1 (impar) | $\{1\},\{2\},\{3\}$ | 3 |
+| 2 (par) | $\{1,2\},\{1,3\},\{2,3\}$ | 3 |
+| 3 (impar) | $\{1,2,3\}$ | 1 |
+
+Pares: $1+3=4$. Impares: $3+1=4$. Iguales. $\checkmark$
+
+$$\sum_{i=0}^{3}(-1)^i\binom{3}{i} = \binom{3}{0} - \binom{3}{1} + \binom{3}{2} - \binom{3}{3} = 1 - 3 + 3 - 1 = 0 \checkmark$$
+
+---
+
+**Conexión con el Binomio de Newton**
+
+Este resultado es un caso particular del binomio de Newton con $x = -1$, $y = 1$:
+
+$$(1 + x)^n = \sum_{i=0}^{n} \binom{n}{i} x^i \implies (1-1)^n = \sum_{i=0}^{n}(-1)^i\binom{n}{i} = 0 \quad (n \geq 1)$$
+
+La prueba combinatoria del ejercicio es más profunda: explica *por qué* se cancelan, no solo que se cancelan.
