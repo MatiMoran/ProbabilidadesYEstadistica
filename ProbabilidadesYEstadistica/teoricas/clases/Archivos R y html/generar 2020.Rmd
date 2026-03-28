@@ -1,0 +1,378 @@
+---
+title: "generar2020"
+output:
+  html_document:
+    df_print: paged
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+```{r}
+set.seed(1)
+```
+
+
+# Ejemplo 1: dos dados
+Tiramos dos dados, queremos aproximar vía 
+simulaciones, la probabilidad de que la suma dé 8
+
+Queremos  simular la tirada de dos dados. Para ello, usamos
+el comando ```sample()```.
+```sample()``` es una de las primeras funciones relevantes para
+simular. Para saber que hace esta función, basta tipear
+```{r}
+?sample
+
+```
+
+ en la consola de comandos, y ver qué se abre en la ventana
+ del help.
+ Aparece un montón de información.
+
+```sample()```  toma hasta 4 argumentos, aunque solo el primero, ```x``` es
+ fundamental.
+
+```x```       es el vector de elementos del cual uno
+        quiere samplear (obtener observaciones).
+
+```size```   es el numero de observaciones que uno quiere
+        obtener.
+
+```replace```   determina si uno está muestreando con o sin
+         reposición
+          (```replace = TRUE``` para muestrear con reposición).
+
+```prob```    es un vector de pesos o probabilidades asociadas a
+          x. Debería ser positivo y sus coordenadas sumar 1.
+
+ Para obtener un numero aleatorio entre 1 y 10 inclusive,
+
+```{r}
+sample(x = 1:10,size = 1)
+```
+ Cada vez que corremos la instrucción, obtenemos un resultado
+ (potencialmente) distinto
+ 
+```{r}
+sample(x = 1:10,size = 1)
+```
+Para obtener dos tiros del dado, hacemos
+
+```{r}
+sample(x = 1:6, size = 2, replace = TRUE) # tiramos dos dados
+```
+  
+
+ Cada vez que corremos la instrucción, obtenemos un resultado
+ distinto
+```{r}
+sample(x = 1:6, size = 2, replace = TRUE) 
+sample(x = 1:6, size = 2, replace = TRUE) 
+
+```
+
+
+
+ Guardamos el resultado en un vector, que llamamos "dados"
+```{r}
+dados <- sample(x = 1:6, size = 2, replace = TRUE)
+
+```
+
+
+ Vemos cuanto salió
+```{r}
+dados
+```
+
+
+ Ahora, cada vez que nos refiramos a "dados" estaremos
+ trabajando con estos valores.
+
+ Veamos cuanto da la suma de los valores
+```{r}
+sum(dados)
+```
+
+
+ Armemos la indicadora de éxito, o sea, una funcion
+ que valga 1 (o TRUE) si la suma es 8, y 0 (FALSE) sino
+
+```{r}
+sum(dados) == 8 # chequeamos si fuimos exitosos
+
+```
+
+(equivale a la indicadora de éxito)
+
+ Ahora replicamos el código de arriba 20 veces.
+ Para eso, creamos un vector donde guardar los resultados,
+ inicialmente un vector con 20 ceros
+```{r}
+resultados <- rep(0,20)
+```
+
+
+ El ```for``` es una instrucción sencilla de ciclo (loop). 
+ Comienza con el contador, (i en este caso) en el primer 
+ valor (i=1 en nuestro caso). Luego realiza lo que esta 
+ entre llaves, y cuando termina, aumenta el contador en una 
+ unidad (i=2) y vuelve a repetir la expresión que está entre
+ llaves. Esto lo realiza hasta que el contador toma el último número (20 en nuestro caso) inclusive. Entre llaves le estamos pidiendo que repita: 
+ tirar dos veces un dado, sumarlos, chequear si vale 8 y 
+ anotar la indicadora de éxito en la coordenada 
+ correspondiente del vector resultados.
+```{r}
+for(i in 1:20){ 
+  dados <- sample(x = 1:6, size = 2, replace = TRUE) 
+  resultados[i] <- sum(dados) == 8
+}
+
+
+resultados
+mean(resultados)  # frecuencia empirica o proporcion observada
+
+```
+
+
+
+ Calculemos la verdadera probabilidad que queremos aproximar. Sea Omega el conjunto de pares ordenados, con ambas coordenadas entre 1 y 6, definimos:
+  A = {(2,6),(3,5),(4,4),(5,3),(6,2)}. 
+  Entonces
+ P(A) = 5/36 = 0.1388889 
+```{r}
+5/36   
+```
+
+
+ Aumentamos el tamaño de muestra a 100000, y repetimos
+```{r}
+n <- 100000
+resultados <- rep(0,n)
+
+for(i in 1:n){ 
+  dados <- sample(x = 1:6, size = 2, replace = TRUE) 
+  resultados[i] <- sum(dados) == 8
+}
+
+mean(resultados)  
+
+```
+
+
+
+# Ejemplo 2: Cumpleaños (ejercicio Práctica 1)
+
+ >Se elige un grupo de r personas al azar y se les pregunta 
+ su fecha de cumpleaños. Si bien los años no son todos 
+ iguales en longitud, y se sabe que los porcentajes de    nacimientos no son constantes a través del año, como una 
+ primera aproximación podemos suponer que una elección al 
+ azar de personas es equivalente a realizar una seleccion al 
+ azar de las fechas de nacimientos y además considerar que 
+ el año tiene 365 días. Bajo estas hipótesis, calcular
+ la probabilidad de que entre las r personas elegidas al azar  todas tengan distintas fechas de cumpleaños. 
+
+ Llamemos $A_r$ al evento de interés. En la Práctica 1 probamos que 
+ $$P(A_r) =365!/(365^r * (365-r)! )$$
+
+* para $r=23, P(A_r) = 0.4927$
+* para $r=30, P(A_r) = 0.29368$
+
+
+ Podemos armar una muestra de 23 cumpleaños, como antes
+```{r}
+sample(x = 1:365, size = 23, replace = TRUE)
+
+```
+
+
+ Interesa ver si se repiten.
+ Para hacer esto, necesitamos poder determinar si todos los 
+ elementos en un vector son únicos. R tiene muchas, muchas 
+ funciones que pueden usarse con vectores. Para la mayoría 
+ de las cosas que uno quiera hacer, habrá una función R que 
+ lo haga. En este caso, es ```anyDuplicated ()```, que devuelve 
+ la ubicación del primer duplicado si hay alguno, y cero 
+ en caso contrario.
+
+ 
+ Lo importante para  aprender de esto no es necesariamente 
+ esta función en particular, sino el hecho de que la mayoría 
+ de las tareas son posibles a través de algunas funciones 
+ que se pueden googlear.
+```{r}
+cumples <- sample(x = 1:365, size = 23, replace = TRUE)
+anyDuplicated(cumples)
+cumples
+
+```
+
+
+
+ Repetimos primero 20 veces
+```{r}
+resultcumples  <- rep(0,20)
+for(i in 1:20){ 
+  cumples <- sample(x = 1:365, size = 23, replace = TRUE)
+  resultcumples[i] <- anyDuplicated(cumples)
+}
+
+resultcumples
+
+```
+
+
+calculamos la indicadora de exito
+```{r}
+resultcumples==0
+
+```
+
+
+y contamos la proporción de éxitos en las repeticiones
+```{r}
+mean(resultcumples==0)   # proporción de ceros en resultcumples
+
+```
+
+
+ Finalmente lo repetimos 100000 veces.
+```{r}
+n <- 100000
+resultcumples  <- rep(0,n)
+for(i in 1:n){ 
+  cumples <- sample(x = 1:365, size = 23, replace = TRUE)
+  resultcumples[i] <- anyDuplicated(cumples)
+}
+mean(resultcumples==0)   # estimacion de P(A_r)
+
+```
+
+
+ para $r=23, P(A_r) = 0.4927$
+
+
+ Lo podemos hacer para $r=30$
+```{r}
+n <- 100000
+resultcumples  <- rep(0,n)
+for(i in 1:n){ 
+  cumples <- sample(x = 1:365, size = 30, replace = TRUE)
+  resultcumples[i] <- anyDuplicated(cumples)
+}
+mean(resultcumples==0)   # estimacion de P(A_r)
+
+```
+
+ también puede hacerse usando la instrucción ```replicate() ```
+ del R, que reemplaza al ```for```
+```{r}
+resultsimulacion<-replicate(100000,{ 
+  cumples <- sample(x = 1:365, size = 30, replace = TRUE)
+   anyDuplicated(cumples)
+})
+mean(resultsimulacion==0)
+
+```
+
+ para $r=30, P(A_r) = 0.29368$.
+
+
+ ¿Ventajas? Por ejemplo, con datos de nacimientos, con este método podemos 
+ levantar  el supuesto de que las fechas son 
+ equiprobables. ¡E incorporar el 29 de febrero! 
+ Podemos aproximar probabilidades mas dificiles de calcular.
+ Una buena fuente: el libro disponible online
+ *Foundations of Statistics with R*
+Darrin Speegle and Bryan Clair, https://mathstat.slu.edu/~speegle/_book/
+ Ver la seccion de simulaciones, en el capítulo 2.4.
+
+# Otros gráficos.
+
+## Graficamos la trayectoria
+ 
+ Para eso, acomodamos una matriz, donde cada columna es una
+ sucesion de promedios, $\bar{X}_n$ comenzando con el promedio 
+ de una observacion y terminando con n (5000).
+Hay B trayectorias diferentes
+
+ La programación intenta ser simple (fácil de entender), no computacionalmente 
+ eficiente (eso seguro no es. Los ```for``` no estan recomendados en R). Se puede mejorar toda la programacion usando, por ejemplo, la funcion ```replicate```, o un ```for``` indexado en vectores.
+ 
+```{r}
+B<-500
+n<-5000
+
+unatrayequis<-rep(0,n)
+resultcumples  <- rep(0,n)
+unatraypromedio <- matrix(rep(0,n*B),nrow = n,ncol = B)
+unatrayequis <- rep(0,n)
+resultcumples <- rep(0,n)
+for(j in 1:B){
+for(i in 1:n){ 
+  cumples <- sample(x = 1:365, size = 23, replace = TRUE)
+  resultcumples[i] <- anyDuplicated(cumples)
+  unatrayequis[i]<-resultcumples[i]==0
+  unatraypromedio[i,j]<-mean(unatrayequis[1:i])
+  }}
+mean(resultcumples==0)   # estimacion de P(A_r)
+```
+
+## Graficamos 10 trayectorias de los promedios, con n entre 1 y 1000
+```{r}
+plot(1:1000,unatraypromedio[1:1000,1],type="l",ylim = c(0,1))
+for(j in 2:10){ 
+  points(1:1000,unatraypromedio[1:1000,j],type="l",
+         col=rainbow(10)[j])}
+abline(h=0.4927,lty=2)
+```
+
+
+ Graficamos 10 trayectorias de los promedios, 
+ con n entre 1 y 5000
+```{r}
+plot(1:n,unatraypromedio[,1],type="l",ylim = c(0,1))
+for(j in 2:10){ 
+points(1:n,unatraypromedio[,j],type="l",col=rainbow(10)[j])}
+abline(h=0.4927,lty=2)
+
+```
+
+
+## Histogramas de promedios, fijando el eje x en (0,1)
+```{r}
+par(mfrow=c(2,3))
+hist(unatraypromedio[1,],xlim = c(0,1),main = "Observaciones (n=1)",
+     xlab="",ylab = "",freq = F)
+hist(unatraypromedio[10,],xlim = c(0,1),main = "n = 10",
+     xlab="",ylab = "",freq = F)
+hist(unatraypromedio[100,],xlim = c(0,1),main = "n = 100",
+     xlab="",ylab = "",freq = F)
+hist(unatraypromedio[500,],xlim = c(0,1),main = "n = 500",
+     xlab="",ylab = "",freq = F)
+hist(unatraypromedio[1000,],xlim = c(0,1),main = "n = 1000",
+     xlab="",ylab = "",freq = F)
+hist(unatraypromedio[5000,],xlim = c(0,1),main = "n = 5000",
+     xlab="",ylab = "",freq = F)
+
+```
+
+
+## Histogramas de promedios, moviendo la escala del eje x
+```{r}
+par(mfrow=c(2,3))
+hist(unatraypromedio[1,],main = "Observaciones (n=1)",
+     xlab="",ylab = "",freq = F)
+hist(unatraypromedio[10,],main = "n = 10",
+     xlab="",ylab = "",freq = F)
+hist(unatraypromedio[100,],main = "n = 100",
+     xlab="",ylab = "",freq = F)
+hist(unatraypromedio[500,],main = "n = 500",
+     xlab="",ylab = "",freq = F)
+hist(unatraypromedio[1000,],main = "n = 1000",
+     xlab="",ylab = "",freq = F)
+hist(unatraypromedio[5000,],main = "n = 5000",
+     xlab="",ylab = "",freq = F)
+
+```
