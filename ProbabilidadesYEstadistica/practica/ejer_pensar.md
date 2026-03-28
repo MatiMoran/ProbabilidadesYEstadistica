@@ -2481,6 +2481,82 @@ mientras que cada uno de los $n-3$ participantes restantes tiene probabilidad $\
 ## Ejercicio 26.
 Se tiene una urna con 2019 bolitas rojas. Se van sacando bolitas de la urna. Cuando se saca una bolita roja, se agregan tantas bolitas azules como bolitas quedan en la urna. Cuando se saca una bolita azul, se continúa sacando. ¿Cuál es la probabilidad de que la última bolita que se saque sea azul?
 
+### Solución
+
+**1. ¿Por qué es paradójico?**
+
+La intuición dice: "hay solo rojas al principio, las azules aparecen de a poco, ¿cómo puede ser casi seguro que la última sea azul?". Pero la regla crea un efecto de *avalancha*: cada bolita roja extraída inyecta tantas azules como quedan en la urna, duplicando el tamaño de la urna (menos 1). Con 2019 rojas, las azules terminan siendo astronómicamente mayoría.
+
+**2. Idea clave**
+
+Definir el estado $(r, b)$ (rojas, azules) y buscar la fórmula cerrada de $h(r, b) = P(\text{última es roja} \mid r \text{ rojas}, b \text{ azules})$ por inducción, luego identificar el patrón.
+
+**3. Resolución paso a paso**
+
+**Dinámica del estado:** desde $(r, b)$,
+- Con prob $\tfrac{r}{r+b}$ se extrae roja → quedan $r+b-1$ bolitas → se agregan $r+b-1$ azules → nuevo estado $(r-1,\; r+2b-1)$.
+- Con prob $\tfrac{b}{r+b}$ se extrae azul → nuevo estado $(r, b-1)$.
+
+**La recurrencia para $h(r,b)$** es:
+
+$$h(r,b) = \frac{r}{r+b}\,h(r-1,\,r+2b-1) + \frac{b}{r+b}\,h(r,b-1)$$
+
+con $h(0,b)=0$ para todo $b\geq 0$, y $h(r,0)=h(r-1,r-1)$ (la primera extracción es siempre roja).
+
+**Casos pequeños** para encontrar el patrón:
+
+| $n$ (rojas iniciales) | proceso | $h(n,0)$ = P(última roja) | P(última azul) |
+|---|---|---|---|
+| 1 | $(1,0)\to$ extrae roja, urna vacía | $1$ | $0$ |
+| 2 | $(2,0)\to(1,1)$: roja o azul con prob $\tfrac12$ | $\tfrac12$ | $\tfrac12$ |
+| 3 | $(3,0)\to(2,2)\to\cdots$ | $\tfrac14$ | $\tfrac34$ |
+| 4 | $(4,0)\to(3,3)\to\cdots$ | $\tfrac18$ | $\tfrac78$ |
+
+Patrón evidente: $h(n,0)=\dfrac{1}{2^{n-1}}$.
+
+**Fórmula general:** postulamos
+
+$$\boxed{h(n,b) = \frac{n}{2^{n-1}(n+b)}}$$
+
+**Verificación (que satisface la recurrencia):**
+
+Sustituyendo en el lado derecho:
+
+$$\frac{r}{r+b}\cdot\frac{r-1}{2^{r-2}(2r+2b-2)} + \frac{b}{r+b}\cdot\frac{r}{2^{r-1}(r+b-1)}$$
+
+$$= \frac{r(r-1)}{(r+b)\cdot 2^{r-1}(r+b-1)} + \frac{br}{(r+b)\cdot 2^{r-1}(r+b-1)} = \frac{r(r-1+b)}{(r+b)\cdot 2^{r-1}(r+b-1)} = \frac{r}{(r+b)\cdot 2^{r-1}}$$
+
+que es exactamente $h(r,b) = \dfrac{r}{2^{r-1}(r+b)}$. ✓
+
+El caso base $h(1,b)=\dfrac{1}{b+1}$ se verifica directamente: al extraer la única bolita roja (desde estado $(1,b)$), solo termina siendo la última si $b=0$; de lo contrario, con $b>0$ se agregan $b$ azules y esas son las últimas. Esto da $h(1,b)=\tfrac{b}{b+1}\,h(1,b-1)$ con $h(1,0)=1$, cuya solución es $\tfrac{1}{b+1}$, coincidiendo con la fórmula. ✓
+
+**4. Resultado**
+
+Para el problema original: $n=2019$, $b=0$:
+
+$$P(\text{última es roja}) = h(2019,0) = \frac{2019}{2^{2018}\cdot 2019} = \frac{1}{2^{2018}}$$
+
+$$\boxed{P(\text{última es azul}) = 1 - \frac{1}{2^{2018}}}$$
+
+**5. Tabla de valores para distintos $n$**
+
+| $n$ | P(última roja) | P(última azul) |
+|---|---|---|
+| 1 | $1$ | $0$ |
+| 2 | $1/2 \approx 0.5$ | $1/2$ |
+| 3 | $1/4 = 0.25$ | $3/4$ |
+| 5 | $1/16 \approx 0.063$ | $15/16$ |
+| 10 | $1/512 \approx 0.002$ | $\approx 0.998$ |
+| 2019 | $\approx 10^{-608}$ | $\approx 1$ |
+
+**6. Generalización**
+
+Con $n$ bolitas rojas iniciales y $b$ azules, la probabilidad de que la última sea roja es $\dfrac{n}{2^{n-1}(n+b)}$.
+
+En particular, con solo rojas ($b=0$): $P(\text{última roja}) = \dfrac{1}{2^{n-1}} \xrightarrow{n\to\infty} 0$.
+
+La regla de "agregar tantas azules como quedan" es equivalente a duplicar la urna en cada extracción roja, lo que hace que la probabilidad de que la última sea roja decaiga exponencialmente en $n$.
+
 ---
 
 ## Ejercicio 27.
