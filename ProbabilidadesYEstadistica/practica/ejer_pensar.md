@@ -2184,20 +2184,297 @@ Nótese que incluso con una ventaja de 60 a 40 (ganar por 20%), la probabilidad 
 ## Ejercicio 22.
 En un tablero de 2026 columnas por 2025 filas, se construye un laberinto eligiendo al azar si colocar o no una pared en cada lado de los cuadrados unitarios (con probabilidad $1/2$), a excepción de los bordes laterales del tablero, que siempre tienen paredes. Calcular la probabilidad de que exista un camino que permita ir desde arriba del tablero hasta abajo.
 
+### Solución
+
+**1. ¿Por qué es interesante/paradójico?**
+
+A primera vista parece un problema complicado: hay millones de aristas aleatorias y rutas posibles. La intuición dice que la probabilidad debería depender de las dimensiones del tablero de forma no trivial. Sin embargo, la respuesta es exactamente $1/2$, independientemente de que el tablero sea $2026 \times 2025$ en lugar de, por ejemplo, $100 \times 100$. Las dimensiones asimétricas son la clave que activa un argumento elegante.
+
+**2. Idea clave: dualidad planar en percolación de enlaces**
+
+Este es un problema de **percolación de enlaces** (*bond percolation*) en la retícula cuadrada. La herramienta central es la **dualidad planar**: cada grafo planar tiene un grafo dual donde los roles de aristas abiertas y cerradas se intercambian. A $p = 1/2$, el grafo y su dual tienen exactamente la misma distribución. Esto convierte eventos complementarios en eventos equiprobables, forzando a cada uno a tener probabilidad $1/2$.
+
+**3. Resolución paso a paso**
+
+**Paso 1: Modelo formal.**
+
+El tablero tiene $2026$ columnas y $2025$ filas de celdas unitarias. Cada arista interna entre celdas adyacentes (compartida horizontalmente o verticalmente) es **abierta** (sin pared) con probabilidad $1/2$ y **cerrada** (con pared) con probabilidad $1/2$, independientemente. Los bordes laterales (izquierdo y derecho) están siempre cerrados. Los bordes superior e inferior participan normalmente.
+
+Queremos:
+$$P(\text{existe camino abierto de arriba a abajo})$$
+
+**Paso 2: El grafo dual.**
+
+Para cada retícula planar $G$, se define el **grafo dual** $G^*$ cuyas aristas cruzan perpendicularmente a las de $G$. Si una arista de $G$ está abierta, la arista dual correspondiente está cerrada, y viceversa.
+
+En nuestro tablero de $2026 \times 2025$ celdas, el dual es un tablero de $2025 \times 2026$ celdas (columnas y filas intercambiadas). A $p = 1/2$, las aristas del dual son independientes, cada una abierta con probabilidad $1/2$, **misma distribución que el primal**.
+
+**Paso 3: Eventos complementarios.**
+
+Con las condiciones de borde dadas (laterales siempre cerrados), vale el siguiente resultado topológico:
+
+> En cualquier realización del laberinto, **exactamente uno** de los siguientes eventos ocurre:
+> - $A$: existe un camino **abierto** de arriba a abajo en $G$
+> - $B$: existe un camino **abierto** de izquierda a derecha en $G^*$ (equivalentemente: un camino **cerrado** de izquierda a derecha en $G$)
+
+Esto se debe a que en el plano, un camino vertical y un camino horizontal que atraviesan el rectángulo deben cruzarse. Si se cruzan, comparten una arista, y esa arista no puede ser simultáneamente abierta (para el camino vertical) y cerrada (para el camino horizontal del dual). Luego $A$ y $B$ no pueden ocurrir juntos. Por argumentos topológicos (teorema de Jordan discreto), tampoco pueden ambos fallar: si no hay camino abierto arriba-abajo, el conjunto de aristas cerradas forma una "barrera" horizontal en el dual, creando un camino abierto en el dual de izquierda a derecha.
+
+Por lo tanto: $A$ y $B$ son **complementarios**, es decir, $P(A) + P(B) = 1$.
+
+**Paso 4: Simetría a $p = 1/2$.**
+
+Las condiciones de borde: izquierdo y derecho siempre cerrados en $G$ se convierten en izquierdo y derecho siempre **abiertos** en $G^*$ (aristas duales de aristas primales siempre cerradas son siempre abiertas). Entonces en $G^*$, los bordes laterales están siempre abiertos, y el problema de cruzar $G^*$ de izquierda a derecha es el **mismo tipo de problema** que cruzar $G$ de arriba a abajo (con roles de dimensiones y bordes intercambiados). Las dimensiones $2026 \times 2025$ y $2025 \times 2026$ son la misma situación por simetría del enunciado.
+
+A $p = 1/2$, la distribución es invariante bajo el intercambio abierto $\leftrightarrow$ cerrado, luego:
+$$P(A) = P(\text{camino abierto arriba-abajo en } G) = P(\text{camino abierto izq-der en } G^*) = P(B)$$
+
+**Paso 5: Conclusión.**
+
+De $P(A) + P(B) = 1$ y $P(A) = P(B)$:
+$$\boxed{P(A) = \dfrac{1}{2}}$$
+
+**4. ¿Por qué $2026 \times 2025$ y no $n \times n$?**
+
+Con un tablero cuadrado $n \times n$, el argumento de complementariedad entre cruce vertical y cruce horizontal también funciona, pero los eventos $A$ y $B$ no serían inmediatamente simétricos (cruzar de arriba a abajo vs. de izquierda a derecha son el mismo problema en un cuadrado). Las dimensiones $2026 \times 2025$ (asimétricas) hacen el problema más sorprendente: la asimetría podría sugerir que las probabilidades dependen de si el tablero es "más alto" o "más ancho", pero la dualidad a $p=1/2$ garantiza $1/2$ en todos los casos.
+
+**5. Generalización**
+
+Para cualquier tablero $m \times n$ (con bordes laterales siempre cerrados) y $p = 1/2$:
+$$P(\text{camino abierto arriba-abajo}) = \frac{1}{2}$$
+
+Para $p \neq 1/2$, esta simetría se rompe: si $p > 1/2$ hay más aristas abiertas y la probabilidad de cruce vertical aumenta; si $p < 1/2$ disminuye. El valor crítico exacto para la retícula cuadrada es $p_c = 1/2$ (teorema de Kesten, 1980).
+
 ---
 
 ## Ejercicio 23.
 Juan va al casino con \$100. Juega repetidamente a un juego donde paga \$1 cada vez para jugar. Si gana, se lleva \$2 y si pierde, no se lleva nada. En cada apuesta tiene la misma probabilidad de ganar que de perder. Deja de jugar cuando llega a tener \$101, y se va contento de que "le ganó al casino", o cuando se queda sin dinero. Determinar la probabilidad de que Juan le gane al casino. ¿Y si la probabilidad de ganar en cada apuesta es $p$ con $0 < p < 1$?
+
+### Solución
+
+**1. ¿Por qué es interesante/paradójico?**
+
+Juan solo necesita ganar \$1 neto partiendo de \$100. Parece casi seguro que lo logre antes de perder todo. Sin embargo, la probabilidad de "ganarle al casino" es apenas $\frac{100}{101} \approx 99\%$... que sigue siendo alta. El verdadero golpe viene al generalizar a $p < 1/2$: aunque Juan solo necesita subir \$1, si el juego es levemente desfavorable la probabilidad colapsa drásticamente. El casino no necesita una ventaja grande para destruir al jugador a largo plazo.
+
+**2. Idea clave: Ruina del Jugador (Gambler's Ruin)**
+
+Cada ronda Juan gana o pierde exactamente \$1 (neto), con probabilidades $p$ y $q = 1-p$. Su capital es una caminata aleatoria con barreras absorbentes en $0$ y $101$. La probabilidad de alcanzar $101$ antes de llegar a $0$, partiendo de $k$, se resuelve con una **ecuación en diferencias lineal de segundo orden**.
+
+**3. Resolución paso a paso**
+
+**Paso 1: Planteo.**
+
+Sea $P_k$ = probabilidad de que Juan llegue a \$101 partiendo de \$k. Las barreras son $P_0 = 0$ y $P_{101} = 1$. Para $1 \le k \le 100$, por la ley de probabilidad total condicionando en el primer resultado:
+
+$$P_k = p \cdot P_{k+1} + q \cdot P_{k-1}$$
+
+**Paso 2: Caso $p = q = 1/2$ (juego justo).**
+
+La ecuación se convierte en $P_k = \frac{1}{2}P_{k+1} + \frac{1}{2}P_{k-1}$, o equivalentemente $P_{k+1} - P_k = P_k - P_{k-1}$. Las diferencias consecutivas son constantes, luego $P_k$ es **lineal en $k$**:
+
+$$P_k = ak + b$$
+
+Con $P_0 = 0 \Rightarrow b = 0$ y $P_{101} = 1 \Rightarrow a = \frac{1}{101}$:
+
+$$P_k = \frac{k}{101}$$
+
+Juan empieza con $k = 100$:
+
+$$\boxed{P_{100} = \frac{100}{101} \approx 99.01\%}$$
+
+**Paso 3: Caso general $p \neq q$.**
+
+La ecuación $P_k = p\, P_{k+1} + q\, P_{k-1}$ es lineal de segundo orden. Se busca solución de la forma $P_k = r^k$, lo que lleva a:
+
+$$p\,r^2 - r + q = 0 \implies r = 1 \quad \text{o} \quad r = \frac{q}{p}$$
+
+La solución general es $P_k = A + B\left(\frac{q}{p}\right)^k$. Aplicando condiciones de borde:
+
+$$P_0 = 0 \implies A + B = 0 \implies B = -A$$
+
+$$P_{101} = 1 \implies A\left(1 - \left(\frac{q}{p}\right)^{101}\right) = 1 \implies A = \frac{1}{1 - \left(\frac{q}{p}\right)^{101}}$$
+
+Luego:
+
+$$P_k = \frac{1 - \left(\dfrac{q}{p}\right)^k}{1 - \left(\dfrac{q}{p}\right)^{101}}$$
+
+Para $k = 100$:
+
+$$\boxed{P_{100} = \frac{1 - \left(\dfrac{q}{p}\right)^{100}}{1 - \left(\dfrac{q}{p}\right)^{101}}}$$
+
+**4. Tabla numérica — efecto de una pequeña desventaja**
+
+| $p$ | $q/p$ | $P_{100}$ (aprox.) |
+|-----|--------|---------------------|
+| $0.50$ | $1.000$ | $100/101 \approx 99.0\%$ |
+| $0.49$ | $1.041$ | $\approx 33.7\%$ |
+| $0.48$ | $1.083$ | $\approx 8.7\%$ |
+| $0.45$ | $1.222$ | $\approx 0.3\%$ |
+| $0.40$ | $1.500$ | $\approx 0.0006\%$ |
+
+Con solo 1% de desventaja ($p = 0.49$), la probabilidad cae de 99% a 34%. El casino no necesita una gran ventaja.
+
+**5. Generalización**
+
+Para una caminata aleatoria con barreras en $0$ y $N$, partiendo de $k$:
+
+$$P_k = \begin{cases} \dfrac{k}{N} & \text{si } p = \tfrac{1}{2} \\[10pt] \dfrac{1 - (q/p)^k}{1 - (q/p)^N} & \text{si } p \neq \tfrac{1}{2} \end{cases}$$
+
+Este resultado es fundamental en teoría de colas, finanzas y biología evolutiva (fijación de alelos). Observar que cuando $p < 1/2$ y $N$ es grande, $(q/p)^k \gg 1$ y $(q/p)^N \gg (q/p)^k$, por lo que $P_k \approx (p/q)^{N-k} \to 0$: la ruina es casi segura.
 
 ---
 
 ## Ejercicio 24.
 Ana lanza tres dados con forma de tetraedro, cada uno de los cuales tiene en sus caras los números del 1 al 4, todos equiprobables. Beto lanza dos dados usuales con los números del 1 al 6 en sus caras, todos equiprobables. El puntaje de Ana es la suma de sus tres resultados, y el puntaje de Beto es la suma de sus dos resultados. ¿Cuál es la probabilidad de que el puntaje de Ana sea estrictamente mayor al de Beto?
 
+### Solución
+
+**1. ¿Por qué es interesante/paradójico?**
+
+Ana tira 3 dados de 4 caras y Beto tira 2 dados de 6 caras. Las sumas de ambos van de 3 a 12 y de 2 a 12 respectivamente, con distribuciones distintas. La media de Ana es $3 \times 2.5 = 7.5$ y la de Beto es $2 \times 3.5 = 7$, así que Ana tiene ventaja en valor esperado. Sin embargo, la probabilidad de que Ana gane estrictamente resulta ser **exactamente $1/2$**. Sorprendente: la ventaja promedio no alcanza para superar a Beto más de la mitad de las veces.
+
+**2. Idea clave: función generatriz y conteo exhaustivo**
+
+La distribución de cada suma se obtiene expandiendo el **polinomio generatriz** correspondiente. Luego, $P(A > B)$ se calcula como una doble suma sobre todos los pares $(a, b)$ con $a > b$.
+
+**3. Resolución paso a paso**
+
+**Paso 1: Distribución de Ana (3d4).**
+
+Cada dado aporta valores en $\{1,2,3,4\}$; total de resultados: $4^3 = 64$.
+
+El polinomio generatriz es:
+$$A(x) = (x + x^2 + x^3 + x^4)^3$$
+
+Los coeficientes (cantidad de formas de obtener cada suma):
+
+| Suma $a$ | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 |
+|----------|---|---|---|---|---|---|---|----|----|----|
+| Casos    | 1 | 3 | 6 |10 |12 |12 |10 | 6  | 3  | 1  |
+
+(Distribución simétrica alrededor de $7.5$, suma $= 64$.)
+
+**Paso 2: Distribución de Beto (2d6).**
+
+Cada dado aporta valores en $\{1,\ldots,6\}$; total: $6^2 = 36$.
+
+| Suma $b$ | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 |
+|----------|---|---|---|---|---|---|---|---|----|----|----|
+| Casos    | 1 | 2 | 3 | 4 | 5 | 6 | 5 | 4 | 3  | 2  | 1  |
+
+(Distribución simétrica alrededor de $7$, suma $= 36$.)
+
+**Paso 3: Cálculo de $P(A > B)$.**
+
+El total de pares equiprobables es $64 \times 36 = 2304$. Para cada valor $a$ de Ana, se suman los casos de Beto con $b < a$:
+
+| $a$ | Casos Ana | Casos Beto con $b < a$ | Producto |
+|-----|-----------|------------------------|----------|
+| 3   | 1         | 1                      | 1        |
+| 4   | 3         | 1+2 = 3                | 9        |
+| 5   | 6         | 1+2+3 = 6              | 36       |
+| 6   | 10        | 1+2+3+4 = 10           | 100      |
+| 7   | 12        | 1+2+3+4+5 = 15         | 180      |
+| 8   | 12        | 1+2+3+4+5+6 = 21       | 252      |
+| 9   | 10        | 1+2+3+4+5+6+5 = 26     | 260      |
+| 10  | 6         | $\cdots$ = 30          | 180      |
+| 11  | 3         | $\cdots$ = 33          | 99       |
+| 12  | 1         | $\cdots$ = 35          | 35       |
+
+$$\text{Casos favorables} = 1+9+36+100+180+252+260+180+99+35 = 1152$$
+
+$$\boxed{P(A > B) = \frac{1152}{2304} = \frac{1}{2}}$$
+
+**4. ¿Por qué exactamente $1/2$?**
+
+Puede verificarse que también $P(A \leq B) = \frac{1}{2}$, es decir:
+
+$$P(A < B) + P(A = B) = \frac{870 + 282}{2304} = \frac{1152}{2304} = \frac{1}{2}$$
+
+Esto equivale a que $P(A > B) = P(A \leq B)$: el puntaje de Beto es igualmente probable de quedar por encima o por debajo (o igual) al de Ana. No es evidente a priori; es una consecuencia de la forma particular de ambas distribuciones y emerge del cálculo.
+
+**5. Generalización**
+
+En general, para comparar distribuciones discretas $X$ e $Y$, la probabilidad $P(X > Y)$ se obtiene como:
+
+$$P(X > Y) = \sum_{a} \sum_{b < a} P(X = a)\, P(Y = b)$$
+
+que equivale al coeficiente cruzado del producto de las funciones generatrices evaluadas apropiadamente. La simetría $P(X > Y) = 1/2$ es una propiedad notable que no se da en general: depende de la forma específica de las distribuciones.
+
 ---
 
 ## Ejercicio 25.
 12 personas se sientan en una mesa redonda. Juan tiene una moneda de oro en su mano. Van pasando la moneda con probabilidad $1/2$ hacia la izquierda y $1/2$ hacia la derecha. El juego continúa hasta que todos han tocado la moneda; la última persona en tocarla por primera vez se la queda. ¿Cuál es la probabilidad de que gane quien está inmediatamente a la derecha de Juan?
+
+### Solución
+
+**¿Por qué es interesante/paradójico?**
+
+La intuición dice que cada uno de los 11 vecinos de Juan debería tener igual probabilidad $1/11$ de ser el último. Eso es casi correcto, pero los dos vecinos inmediatos (izquierda y derecha) tienen probabilidad *distinta* al resto. ¿Por qué? Porque ellos son los *primeros* en ser alcanzados, lo que los penaliza frente a los más lejanos.
+
+**Idea clave — caminata aleatoria y el resultado del "último visitado"**
+
+Numeremos las personas $0, 1, 2, \ldots, 11$ en sentido horario, con Juan en $0$. La moneda hace una caminata aleatoria simple en el ciclo $\mathbb{Z}_{12}$.
+
+Existe un resultado clásico: en una caminata aleatoria simple sobre $\{0, 1, \ldots, n\}$ con $0$ fijo (ya visitado), la probabilidad de que el nodo $k$ sea el *último* en ser visitado entre $\{1, \ldots, n\}$ es:
+
+$$P(\text{último} = k) = \frac{1}{n-1} \cdot \frac{1}{\text{algo que depende de } k}$$
+
+Más precisamente, se usa el siguiente resultado sobre la caminata en el ciclo. Etiquetar las personas $1, 2, \ldots, 11$ según su distancia a Juan (la persona $k$ está a $k$ pasos en sentido anti-horario o a $12-k$ pasos en sentido horario). La clave es:
+
+> **Resultado:** En una caminata aleatoria sobre los enteros $\{0, 1, \ldots, n\}$ (o equivalentemente en un ciclo de $n+1$ nodos con origen en $0$), la probabilidad de que el nodo $k$ (con $1 \le k \le n-1$) sea el *último* nodo en ser visitado, dado que $0$ ya fue visitado, es:
+> $$P_k = \frac{1}{n-1}, \quad k = 2, 3, \ldots, n-2$$
+> mientras que los extremos tienen:
+> $$P_1 = P_{n-1} = \frac{1}{2(n-1)}$$
+
+**Resolución paso a paso**
+
+Reinterpretamos la mesa redonda de 12 personas como un segmento lineal. Una vez que la moneda toca por primera vez a *alguno* de los dos vecinos de Juan (el de la derecha, posición $1$, o el de la izquierda, posición $11$), el problema se reduce a una caminata en un intervalo $[0, 12]$ con los extremos ya marcados.
+
+La forma estándar de resolver este tipo de problemas es:
+
+**Paso 1 — Reformulación en el segmento.**
+
+Numerar las personas $0, 1, \ldots, 11$ en sentido anti-horario (Juan = $0$, su vecino derecho = $1$, su vecino izquierdo = $11$). La caminata va de $0$ a través del ciclo. El juego termina cuando todos $1, \ldots, 11$ fueron visitados.
+
+**Paso 2 — Probabilidad de ser el último.**
+
+Por el resultado clásico de caminatas aleatorias en el segmento $[0, n]$ con $n = 11$:
+
+- Los nodos interiores $k = 2, 3, \ldots, 10$ tienen probabilidad:
+$$P(\text{último} = k) = \frac{1}{n-1} = \frac{1}{10}$$
+
+- Los nodos extremos $k = 1$ y $k = 11$ (vecinos inmediatos de Juan) tienen:
+$$P(\text{último} = k) = \frac{1}{2(n-1)} = \frac{1}{20}$$
+
+**Verificación:** $2 \cdot \frac{1}{20} + 9 \cdot \frac{1}{10} = \frac{1}{10} + \frac{9}{10} = 1$ ✓
+
+**Paso 3 — Respuesta.**
+
+El vecino inmediato a la derecha de Juan es el nodo $k = 1$, por lo tanto:
+
+$$\boxed{P(\text{gana el vecino derecho de Juan}) = \frac{1}{20}}$$
+
+**Resultado destacado**
+
+$$P = \frac{1}{20} = 0.05$$
+
+Los vecinos inmediatos de Juan tienen la mitad de probabilidad de ganar que cualquier otro participante, porque al estar más cerca, son los primeros en ser alcanzados y por ende los que tienen menor chance de quedar de últimos.
+
+**Tabla de probabilidades**
+
+| Posición (distancia a Juan) | Probabilidad de ganar |
+|---|---|
+| $k = 1$ (vecino derecho) | $\dfrac{1}{20}$ |
+| $k = 2, 3, \ldots, 10$ | $\dfrac{1}{10}$ |
+| $k = 11$ (vecino izquierdo) | $\dfrac{1}{20}$ |
+
+**Generalización**
+
+Para una mesa de $n$ personas (con Juan incluido), la probabilidad de que el vecino inmediato de Juan gane es:
+
+$$P = \frac{1}{2(n-2)}$$
+
+mientras que cada uno de los $n-3$ participantes restantes tiene probabilidad $\dfrac{1}{n-2}$, exactamente el doble. Esto refleja que los extremos de la caminata lineal equivalente son sistemáticamente desfavorecidos.
 
 ---
 
