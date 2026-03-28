@@ -388,10 +388,215 @@ El reclutador elige $c$, rechaza a los primeros $c$ aspirantes y luego contrata 
 - ¿Qué estrategia debe seguir el reclutador para maximizar la probabilidad de contratar al mejor candidato?
 - ¿Cuál es el límite de dicha probabilidad cuando $N \to \infty$?
 
+### Solución
+
+#### ¿Por qué es sorprendente?
+
+La intuición dice que si hay $N$ candidatos, para elegir al mejor deberíamos entrevistarlos a todos y recién al final decidir. Pero el problema exige decidir en el momento. Entonces uno podría pensar: "elijo al primero que parece bueno" — pero eso arriesga descartar candidatos mejores que aún no vimos.
+
+La sorpresa es que existe una estrategia **con una chance de éxito que se acerca al 37%**, independientemente de cuán grande sea $N$. Y esa estrategia tiene una forma elegantísima: ignorar los primeros $c$ candidatos y luego contratar al primero que supere a todos ellos.
+
+---
+
+#### Idea clave: umbral de exploración
+
+Dividimos el proceso en dos fases:
+
+1. **Fase de exploración**: entrevistar los primeros $c$ candidatos sin contratar a nadie. Solo servimos para "calibrar" el nivel.
+2. **Fase de selección**: a partir del candidato $c+1$, contratar al primero que sea mejor que todos los vistos hasta ahora.
+
+El parámetro $c$ controla el balance entre explorar (aprender quiénes son buenos) y explotar (contratar al primero que supera el umbral). Hay que encontrar el $c$ óptimo.
+
+---
+
+#### Resolución paso a paso
+
+**Paso 1 — Fórmula para $P(c)$.**
+
+Sea $P(c)$ la probabilidad de contratar al mejor candidato usando umbral $c$.
+
+Sea $A_k$ el evento "el mejor candidato ocupa la posición $k$". Como el orden es aleatorio:
+
+$$P(A_k) = \frac{1}{N} \quad \text{para todo } k = 1, \ldots, N$$
+
+Condicionando sobre la posición del mejor candidato:
+
+$$P(c) = \sum_{k=1}^{N} P(\text{contratar al mejor} \mid A_k) \cdot P(A_k) = \frac{1}{N} \sum_{k=1}^{N} P(\text{contratar al mejor} \mid A_k)$$
+
+**Paso 2 — ¿Cuándo se contrata al mejor dado que está en la posición $k$?**
+
+- Si $k \leq c$: el mejor cae en la fase de exploración y es descartado. La probabilidad de contratarlo es $0$.
+- Si $k > c$: el mejor está en la fase de selección. Lo contratamos si y solo si **ninguno de los candidatos en las posiciones $c+1, c+2, \ldots, k-1$ fue contratado**, lo que ocurre cuando el mejor de las posiciones $1, \ldots, k-1$ cae dentro de los primeros $c$ (así ninguno de las posiciones $c+1$ a $k-1$ superó el umbral).
+
+La probabilidad de que el mejor entre los primeros $k-1$ esté en las primeras $c$ posiciones es:
+
+$$P(\text{contratar al mejor} \mid A_k) = \frac{c}{k-1} \quad \text{para } k > c$$
+
+**Paso 3 — Sustituyendo en la fórmula.**
+
+$$\boxed{P(c) = \frac{c}{N} \sum_{k=c+1}^{N} \frac{1}{k-1} = \frac{c}{N} \sum_{j=c}^{N-1} \frac{1}{j}}$$
+
+**Paso 4 — Encontrar el $c$ óptimo.**
+
+Para $N$ grande, aproximamos la suma discreta por una integral:
+
+$$\sum_{j=c}^{N-1} \frac{1}{j} \approx \int_{c}^{N} \frac{1}{x}\,dx = \ln\!\left(\frac{N}{c}\right)$$
+
+Entonces:
+
+$$P(c) \approx \frac{c}{N} \ln\!\left(\frac{N}{c}\right)$$
+
+Hacemos el cambio de variable $t = c/N \in (0,1)$:
+
+$$P(t) \approx t \ln\!\left(\frac{1}{t}\right) = -t \ln t$$
+
+Maximizamos respecto a $t$:
+
+$$\frac{d}{dt}(-t \ln t) = -\ln t - 1 = 0 \implies t^* = \frac{1}{e}$$
+
+Por lo tanto, el umbral óptimo es:
+
+$$\boxed{c^* \approx \frac{N}{e} \approx 0.368 \cdot N}$$
+
+Es decir: **rechazar aproximadamente el primer 36.8% de los candidatos** y luego contratar al primero que supere a todos los anteriores.
+
+**Paso 5 — La probabilidad máxima.**
+
+Sustituyendo $t^* = 1/e$:
+
+$$P_{\max} = -\frac{1}{e} \ln\!\left(\frac{1}{e}\right) = -\frac{1}{e} \cdot (-1) = \frac{1}{e}$$
+
+---
+
+#### Límite cuando $N \to \infty$
+
+$$\boxed{\lim_{N \to \infty} P(c^*) = \frac{1}{e} \approx 36.79\%}$$
+
+Esto es notable: sin importar cuántos candidatos haya, la estrategia óptima garantiza **casi el 37% de probabilidad** de elegir al mejor. Y ese porcentaje no mejora al agregar más candidatos.
+
+---
+
+#### Tabla de valores
+
+| $N$ | $c^* = \lfloor N/e \rfloor$ | $P(c^*)$ |
+|:---:|:---:|:---:|
+| 5 | 2 | 43.3% |
+| 10 | 4 | 39.9% |
+| 20 | 7 | 38.4% |
+| 50 | 18 | 37.4% |
+| 100 | 37 | 37.1% |
+| 1000 | 368 | 36.8% |
+| $\infty$ | $N/e$ | $1/e \approx 36.79\%$ |
+
+Notar que para $N$ pequeño la probabilidad es un poco mayor que $1/e$; converge desde arriba.
+
+---
+
+#### Generalización
+
+La función $P(t) = -t \ln t$ tiene un único máximo en $t = 1/e$, independientemente de $N$. El resultado se generaliza a cualquier variante donde:
+
+- Se puede observar el rango relativo de cada candidato.
+- La decisión es irrevocable.
+- El orden es aleatorio.
+
+En ese caso, la estrategia óptima siempre tiene la forma "explorar una fracción $1/e$ y luego tomar el primero que supere el máximo visto", con probabilidad de éxito $1/e$.
+
 ---
 
 ## Ejercicio 6.
 Doob se anota un número distinto en cada mano y las cierra de manera que Kolmogorov no los vea. Luego, K elige una mano y D le muestra el número escrito en esa mano. A continuación K debe adivinar en qué mano está escrito el número más grande. Demostrar que K tiene una estrategia que le asegura tener probabilidad mayor a $1/2$ de ganar independientemente de lo que haga D.
+
+### Solución
+
+#### ¿Por qué es paradójico?
+
+La intuición dice que K no puede ganar más del 50%: ve un solo número y no sabe nada del otro. Ambas manos parecen simétricas — da igual adivinar "este es el mayor" que "el otro es el mayor". Con cualquier estrategia determinista, D podría anticiparla y hacerle perder siempre.
+
+La clave que rompe esta intuición es que K puede usar una estrategia **aleatoria**. Al incorporar su propia aleatoriedad, K crea una asimetría que D no puede predecir ni contrarrestar.
+
+---
+
+#### Idea clave: umbral aleatorio con distribución continua
+
+K genera un número $T$ al azar, con una distribución continua de soporte $\mathbb{R}$ (por ejemplo, una normal estándar). Luego:
+
+- Si el número visto $x > T$: K declara que esa mano tiene el mayor.
+- Si el número visto $x < T$: K declara que la otra mano tiene el mayor.
+
+En esencia, $T$ actúa como un "umbral de referencia" generado por K de manera independiente a lo que haga D.
+
+---
+
+#### Resolución paso a paso
+
+Sean $a < b$ los dos números que Doob escribió (D puede elegirlos como quiera, pero debe ser $a \neq b$).
+
+K elige una mano al azar con probabilidad $1/2$ cada una, y ve $x \in \{a, b\}$.
+
+**Caso 1 — K ve $a$ (el número menor).**
+
+K dice "éste es el mayor" si $a > T$, y "el otro es el mayor" si $a < T$.
+La decisión correcta es "el otro es el mayor", que ocurre cuando $a < T$:
+
+$$P(\text{acierto} \mid \text{ve } a) = P(T > a) = 1 - F(a)$$
+
+donde $F$ es la CDF de $T$.
+
+**Caso 2 — K ve $b$ (el número mayor).**
+
+La decisión correcta es "éste es el mayor", que ocurre cuando $b > T$:
+
+$$P(\text{acierto} \mid \text{ve } b) = P(T < b) = F(b)$$
+
+**Probabilidad total de acierto.**
+
+Como K elige una mano al azar con probabilidad $1/2$:
+
+$$P(\text{acierto}) = \frac{1}{2} P(\text{acierto} \mid \text{ve } a) + \frac{1}{2} P(\text{acierto} \mid \text{ve } b)$$
+
+$$= \frac{1}{2}(1 - F(a)) + \frac{1}{2} F(b)$$
+
+$$= \frac{1}{2} + \frac{1}{2}\bigl(F(b) - F(a)\bigr)$$
+
+**Paso clave.** Como $a < b$ y $F$ es **estrictamente creciente** (porque $T$ tiene distribución continua):
+
+$$F(b) > F(a) \implies F(b) - F(a) > 0$$
+
+Por lo tanto:
+
+$$\boxed{P(\text{acierto}) = \frac{1}{2} + \frac{1}{2}(F(b) - F(a)) > \frac{1}{2}}$$
+
+Esto vale para **cualquier** par $a < b$ que elija D.
+
+---
+
+#### ¿Por qué D no puede contrarrestar la estrategia?
+
+La ventaja de K depende de $F(b) - F(a)$, que es la probabilidad de que el umbral $T$ caiga entre $a$ y $b$. Esta cantidad es siempre positiva porque $T$ tiene distribución continua — no importa qué números elija D, siempre hay probabilidad positiva de que $T$ quede entre ellos.
+
+D podría intentar minimizar esa ventaja eligiendo $a$ y $b$ muy cercanos o muy grandes/chicos, pero como $F$ tiene soporte en todo $\mathbb{R}$, nunca puede hacer que $F(b) - F(a) = 0$.
+
+---
+
+#### Tabla de ejemplos con $T \sim \mathcal{N}(0,1)$
+
+| $a$ | $b$ | $F(b) - F(a)$ | $P(\text{acierto})$ |
+|:---:|:---:|:---:|:---:|
+| $-1$ | $1$ | $0.841 - 0.159 = 0.682$ | $84.1\%$ |
+| $0$ | $1$ | $0.841 - 0.500 = 0.341$ | $67.1\%$ |
+| $10$ | $11$ | $\approx 7.6 \times 10^{-24}$ | $50.000\ldots\%$ |
+| $-100$ | $-99$ | $\approx 7.6 \times 10^{-24}$ | $50.000\ldots\%$ |
+
+La ventaja puede ser ínfima si D elige números alejados del centro de la distribución, pero **nunca es exactamente cero**.
+
+---
+
+#### Generalización
+
+La estrategia funciona con cualquier distribución continua con soporte en $\mathbb{R}$. Lo esencial es que $F$ sea estrictamente creciente en todo punto, para que $F(b) - F(a) > 0$ siempre que $a < b$.
+
+Si en cambio D supiera la distribución de $T$ con exactitud, podría elegir $a$ y $b$ para minimizar la ventaja — pero no puede anularla por completo. La estrategia de K es **universalmente dominante** frente a cualquier estrategia determinista o aleatoria de D.
 
 ---
 
@@ -400,50 +605,1108 @@ En un truelo se enfrentan tres contendientes: A, B y C. El objetivo de cada uno 
 
 Los contendientes tirarán secuencialmente en orden A, B, C; para recomenzar cíclicamente. ¿Cuál es la mejor estrategia para A? ¿Cuál es su probabilidad de ganar?
 
+### Solución
+
+#### ¿Por qué es paradójico?
+
+La intuición dice que A, al ser el peor tirador, está en desventaja. Uno esperaría que A intente eliminar al más peligroso (C) lo antes posible. Pero el resultado es el opuesto: **la mejor estrategia de A es disparar al aire intencionalmente**, y con esa estrategia A termina siendo el jugador con mayor probabilidad de ganar.
+
+La trampa intuitiva es ignorar que A se beneficia de que B y C se eliminen mutuamente. Si A elimina a uno de ellos, A queda mano a mano con el sobreviviente — que tiene mejor puntería. Es mejor dejar que los fuertes se destruyan entre sí.
+
+---
+
+#### Idea clave: análisis de estrategias racionales
+
+Primero determinamos cómo juegan B y C racionalmente, y luego comparamos las tres opciones de A: disparar a B, disparar a C, o errar intencionalmente.
+
+**¿A quién apunta B?**
+
+Si B apunta a C y lo elimina (prob 2/3): B se enfrenta a A, que es el más débil. Bueno para B.
+Si B apunta a A y lo elimina: B se enfrenta a C solo, y C nunca falla — B pierde con seguridad en el siguiente turno.
+
+Entonces **B siempre apunta a C** (es la única opción que le da chances de ganar).
+
+**¿A quién apunta C?**
+
+Si C apunta a B y lo elimina: C enfrenta a A (prob de sobrevivir = 2/3, ya que A falla 2/3 de las veces y C nunca falla).
+Si C apunta a A y lo elimina: C enfrenta a B, que dispara primero — B gana con prob 2/3.
+
+Entonces **C siempre apunta a B** (le da 2/3 de chance vs 1/3 si apunta a A).
+
+**Conclusión:** B y C se apuntan mutuamente. A puede aprovechar esto.
+
+---
+
+#### Resolución paso a paso
+
+Calculamos $P(\text{A gana})$ para cada estrategia de A en su primer turno. Dado que C nunca falla, el juego siempre se resuelve dentro del primer ciclo completo (A, B, C).
+
+**Herramienta: duelos entre dos jugadores.**
+
+Necesitamos las probabilidades de A en duelos uno a uno. Sea $p$ = P(A gana | turno de B) y $q$ = P(A gana | turno de A) en un duelo A vs B:
+
+$$p = \frac{1}{3} \cdot 0 + \frac{2}{3} \cdot q \qquad \text{(B falla con prob } 1/3\text{, da turno a A)}$$
+
+Espera, corrijo:
+$$p = \underbrace{\frac{2}{3} \cdot 0}_{\text{B elimina a A}} + \underbrace{\frac{1}{3} \cdot q}_{\text{B falla, turno de A}}$$
+$$q = \underbrace{\frac{1}{3} \cdot 1}_{\text{A elimina a B}} + \underbrace{\frac{2}{3} \cdot p}_{\text{A falla, turno de B}}$$
+
+Resolviendo: $p = \frac{1}{3}q$ y $q = \frac{1}{3} + \frac{2}{9}q \Rightarrow q = \frac{3}{7},\; p = \frac{1}{7}$.
+
+En A vs C (C nunca falla): si es turno de A, A gana solo si acierta en ese disparo: $P(\text{A gana} \mid \text{turno de A}) = \frac{1}{3}$. Si es turno de C: A pierde con certeza.
+
+| Duelo | Quién dispara primero | $P(\text{A gana})$ |
+|:---:|:---:|:---:|
+| A vs B | B | $\dfrac{1}{7}$ |
+| A vs B | A | $\dfrac{3}{7}$ |
+| A vs C | A | $\dfrac{1}{3}$ |
+| A vs C | C | $0$ |
+
+---
+
+**Opción 1: A apunta a B.**
+
+- Con prob $\frac{1}{3}$: B muere. Siguiente turno: C. Duelo A vs C con C primero. $P(\text{A gana}) = 0$.
+- Con prob $\frac{2}{3}$: A falla. Turno de B. B apunta a C.
+  - Con prob $\frac{2}{3}$: C muere. Turno de A. Duelo A vs B con A primero. $P(\text{A gana}) = \frac{3}{7}$.
+  - Con prob $\frac{1}{3}$: B falla. Turno de C. C elimina a B (siempre). Duelo A vs C con A primero. $P(\text{A gana}) = \frac{1}{3}$.
+
+$$P_{\text{apunta B}} = \frac{1}{3} \cdot 0 + \frac{2}{3}\left[\frac{2}{3} \cdot \frac{3}{7} + \frac{1}{3} \cdot \frac{1}{3}\right] = \frac{2}{3} \cdot \frac{25}{63} \cdot \frac{3}{2} = \frac{2}{3} \cdot \left[\frac{2}{7} + \frac{1}{9}\right] = \frac{2}{3} \cdot \frac{25}{63} = \frac{50}{189}$$
+
+---
+
+**Opción 2: A apunta a C.**
+
+- Con prob $\frac{1}{3}$: C muere. Turno de B. Duelo A vs B con B primero. $P(\text{A gana}) = \frac{1}{7}$.
+- Con prob $\frac{2}{3}$: A falla. Turno de B. B apunta a C.
+  - Con prob $\frac{2}{3}$: C muere. Turno de A (se saltea el turno de C). Duelo A vs B con A primero. $P(\text{A gana}) = \frac{3}{7}$.
+  - Con prob $\frac{1}{3}$: B falla. Turno de C. C elimina a B. Duelo A vs C con A primero. $P(\text{A gana}) = \frac{1}{3}$.
+
+$$P_{\text{apunta C}} = \frac{1}{3} \cdot \frac{1}{7} + \frac{2}{3}\left[\frac{2}{3} \cdot \frac{3}{7} + \frac{1}{3} \cdot \frac{1}{3}\right] = \frac{1}{21} + \frac{2}{3} \cdot \frac{25}{63} = \frac{9}{189} + \frac{50}{189} = \frac{59}{189}$$
+
+---
+
+**Opción 3: A falla intencionalmente.**
+
+- El disparo de A no elimina a nadie. Turno de B. B apunta a C.
+  - Con prob $\frac{2}{3}$: C muere. Turno de A. Duelo A vs B con A primero. $P(\text{A gana}) = \frac{3}{7}$.
+  - Con prob $\frac{1}{3}$: B falla. Turno de C. C elimina a B. Duelo A vs C con A primero. $P(\text{A gana}) = \frac{1}{3}$.
+
+$$P_{\text{falla}} = \frac{2}{3} \cdot \frac{3}{7} + \frac{1}{3} \cdot \frac{1}{3} = \frac{2}{7} + \frac{1}{9} = \frac{18}{63} + \frac{7}{63} = \frac{25}{63} = \frac{75}{189}$$
+
+---
+
+#### Resultado
+
+| Estrategia de A | $P(\text{A gana})$ |
+|:---:|:---:|
+| Apuntar a B | $\dfrac{50}{189} \approx 26.5\%$ |
+| Apuntar a C | $\dfrac{59}{189} \approx 31.2\%$ |
+| **Fallar intencionalmente** | $\mathbf{\dfrac{25}{63} \approx 39.7\%}$ |
+
+$$\boxed{P(\text{A gana con estrategia óptima}) = \frac{25}{63} \approx 39.7\%}$$
+
+**La mejor estrategia de A es fallar intencionalmente en su primer turno**, dejando que B y C se enfrenten entre sí.
+
+---
+
+#### Probabilidades finales de cada jugador (con estrategia óptima de A)
+
+Con prob $\frac{2}{3}$: B elimina a C. Queda A vs B con A primero.
+Con prob $\frac{1}{3}$: C elimina a B. Queda A vs C con A primero.
+
+$$P(\text{A gana}) = \frac{2}{3} \cdot \frac{3}{7} + \frac{1}{3} \cdot \frac{1}{3} = \frac{25}{63} \approx 39.7\%$$
+
+$$P(\text{B gana}) = \frac{2}{3} \cdot \frac{4}{7} = \frac{8}{21} = \frac{24}{63} \approx 38.1\%$$
+
+$$P(\text{C gana}) = \frac{1}{3} \cdot \frac{2}{3} = \frac{2}{9} = \frac{14}{63} \approx 22.2\%$$
+
+Verificación: $25 + 24 + 14 = 63$. ✓
+
+**El jugador más débil tiene la mayor probabilidad de ganar.** C, el único que nunca falla, es paradójicamente el que menos chances tiene.
+
+---
+
+#### ¿Por qué C pierde más?
+
+C dispara último en el primer turno. Para cuando llega el turno de C, B ya tuvo su oportunidad de eliminarlo. C nunca tiene la ventaja de disparar primero en el truelo — siempre entra al duelo uno a uno habiendo sobrevivido el disparo de B. En cambio, A nunca es el objetivo prioritario de nadie, por lo que siempre llega vivo al duelo final.
+
 ---
 
 ## Ejercicio 8.
 Consideremos el conjunto de matrices reales de $n \times n$ cuyas entradas son 0 y 1. Sorteamos en este conjunto una matriz de manera que todas tienen la misma probabilidad. ¿Cuál es la esperanza para el determinante?
+
+### Solución
+
+#### ¿Por qué es sorprendente?
+
+La intuición dice que el determinante puede tomar valores positivos o negativos, y que quizás se cancelen. Pero lo sorprendente es que el resultado es **exactamente cero**, no aproximadamente, para todo $n \geq 2$. Esto vale sin importar cuánto crezca $n$, aunque el determinante en sí pueda ser un número enorme en valor absoluto.
+
+La clave es que hay una simetría perfecta entre los aportes positivos y negativos al determinante, forzada por la distribución de las entradas.
+
+---
+
+#### Idea clave: argumento de simetría por intercambio de columnas
+
+Si permutamos dos columnas de una matriz aleatoria, la nueva matriz tiene **la misma distribución** (las entradas siguen siendo i.i.d. Bernoulli(1/2)), pero el determinante **cambia de signo**. Entonces la esperanza del determinante debe ser igual a su negativo — lo que solo es posible si es cero.
+
+---
+
+#### Resolución paso a paso
+
+**Enfoque 1 — Argumento de simetría (elegante).**
+
+Sea $A$ una matriz aleatoria $n \times n$ con entradas i.i.d. Bernoulli(1/2). Sea $A'$ la matriz obtenida intercambiando las columnas 1 y 2 de $A$.
+
+Como las entradas de $A$ son independientes e igualmente distribuidas, la matriz $A'$ tiene **exactamente la misma distribución** que $A$:
+
+$$A' \overset{d}{=} A$$
+
+Por lo tanto:
+
+$$E[\det(A')] = E[\det(A)]$$
+
+Pero intercambiar dos columnas multiplica el determinante por $-1$:
+
+$$\det(A') = -\det(A)$$
+
+Entonces:
+
+$$E[\det(A)] = E[\det(A')] = E[-\det(A)] = -E[\det(A)]$$
+
+La única solución es:
+
+$$\boxed{E[\det(A)] = 0}$$
+
+Este argumento vale para cualquier $n \geq 2$ (se necesitan al menos dos columnas para intercambiar).
+
+---
+
+**Enfoque 2 — Fórmula de Leibniz + linealidad de la esperanza.**
+
+La fórmula de Leibniz expande el determinante como suma sobre todas las permutaciones de $\{1, \ldots, n\}$:
+
+$$\det(A) = \sum_{\sigma \in S_n} \text{sgn}(\sigma) \prod_{i=1}^n a_{i,\sigma(i)}$$
+
+donde $\text{sgn}(\sigma) \in \{+1, -1\}$ es la signatura de la permutación $\sigma$.
+
+Tomando esperanza y usando linealidad:
+
+$$E[\det(A)] = \sum_{\sigma \in S_n} \text{sgn}(\sigma)\, E\!\left[\prod_{i=1}^n a_{i,\sigma(i)}\right]$$
+
+Para cada permutación $\sigma$, el producto $\prod_{i=1}^n a_{i,\sigma(i)}$ involucra exactamente $n$ entradas, **una de cada fila y una de cada columna** (por definición de permutación). Por lo tanto las $n$ entradas son **independientes entre sí**, y:
+
+$$E\!\left[\prod_{i=1}^n a_{i,\sigma(i)}\right] = \prod_{i=1}^n E[a_{i,\sigma(i)}] = \left(\frac{1}{2}\right)^n$$
+
+Este valor es el **mismo para toda permutación $\sigma$**. Entonces:
+
+$$E[\det(A)] = \left(\frac{1}{2}\right)^n \sum_{\sigma \in S_n} \text{sgn}(\sigma)$$
+
+Para $n \geq 2$, el grupo simétrico $S_n$ tiene exactamente la misma cantidad de permutaciones pares e impares: $\frac{n!}{2}$ de cada tipo. Por lo tanto:
+
+$$\sum_{\sigma \in S_n} \text{sgn}(\sigma) = \frac{n!}{2} \cdot (+1) + \frac{n!}{2} \cdot (-1) = 0$$
+
+Y concluimos:
+
+$$\boxed{E[\det(A)] = \left(\frac{1}{2}\right)^n \cdot 0 = 0}$$
+
+---
+
+#### Verificación para $n = 2$
+
+$$A = \begin{pmatrix} a & b \\ c & d \end{pmatrix}, \quad \det(A) = ad - bc$$
+
+$$E[\det(A)] = E[ad] - E[bc] = E[a]E[d] - E[b]E[c] = \frac{1}{2}\cdot\frac{1}{2} - \frac{1}{2}\cdot\frac{1}{2} = 0 \checkmark$$
+
+Los dos términos son iguales y se cancelan exactamente.
+
+---
+
+#### Tabla: ¿por qué la suma de signaturas es cero?
+
+| $n$ | $|S_n|$ | Permutaciones pares | Permutaciones impares | $\sum \text{sgn}$ |
+|:---:|:---:|:---:|:---:|:---:|
+| 1 | 1 | 1 | 0 | 1 |
+| 2 | 2 | 1 | 1 | 0 |
+| 3 | 6 | 3 | 3 | 0 |
+| 4 | 24 | 12 | 12 | 0 |
+| $n \geq 2$ | $n!$ | $n!/2$ | $n!/2$ | 0 |
+
+Para $n = 1$ el resultado es $E[\det] = E[a_{11}] = 1/2$, caso trivial sin simetría de signo.
+
+---
+
+#### Generalización
+
+El resultado vale para **cualquier distribución i.i.d. con media $\mu$** en las entradas:
+
+$$E[\det(A)] = \mu^n \sum_{\sigma \in S_n} \text{sgn}(\sigma) = 0 \quad \text{para } n \geq 2$$
+
+No depende del valor de $\mu$: tanto el argumento de simetría como el de Leibniz funcionan para cualquier distribución simétrica en las columnas.
 
 ---
 
 ## Ejercicio 9.
 A una fiesta concurren $N$ personas, cada una con un sombrero. Al ingresar a la fiesta cada persona deja su sombrero en una caja grande situada en la entrada del salón. Cuando finaliza el evento, las $N$ personas se dirigen a la entrada del salón y extraen un sombrero al azar de la caja. Aquellas personas que sacan su propio sombrero se retiran de la fiesta. El resto vuelve a colocar los sombreros que extrajeron en la caja y luego cada uno de los todavía presentes extrae nuevamente un sombrero al azar. Este procedimiento se repite hasta que las $N$ personas se hayan retirado de la fiesta. Calcular la esperanza de la cantidad de iteraciones que fueron necesarias hasta conseguir que las $N$ personas se retiraran de la fiesta con su sombrero.
 
+### Solución
+
+#### ¿Por qué es sorprendente?
+
+La intuición dice que como en cada ronda solo sale en promedio **una persona** (la probabilidad de que alguien saque su propio sombrero es $1/N$, y hay $N$ personas), el proceso debería tardar muchísimas rondas. Por ejemplo, con 100 personas, ¿no deberían hacer falta unas 100 o más rondas?
+
+La sorpresa es que la esperanza es exactamente $N$ — la misma cantidad que el número de personas. Y ese "en promedio una persona por ronda" es exactamente la razón: el proceso es mucho más eficiente de lo que parece porque en las rondas tardías quedan pocas personas, que terminan rápido.
+
+---
+
+#### Idea clave: recursión + inducción usando $E[\text{puntos fijos}] = 1$
+
+Definimos $E_k$ = esperanza de rondas hasta terminar cuando quedan $k$ personas. Buscaremos la recursión que satisface $E_k$ y demostraremos que $E_k = k$ para todo $k \geq 1$.
+
+La herramienta central es: **en una permutación aleatoria de $k$ elementos, la esperanza del número de puntos fijos es siempre 1**, sin importar $k$.
+
+---
+
+#### Resolución paso a paso
+
+**Paso 1 — Casos base.**
+
+- $E_1 = 1$: una persona saca inevitablemente su propio sombrero. Sale en la primera ronda. ✓
+- $E_2 = 2$: dos personas, dos sombreros. La permutación es la identidad (ambas salen) con prob $\frac{1}{2}$, o el intercambio (ninguna sale) con prob $\frac{1}{2}$. Entonces $T \sim \text{Geom}(1/2)$ y $E_2 = 2$. ✓
+
+**Paso 2 — Recursión general.**
+
+Con $k$ personas presentes, cada ronda produce una permutación aleatoria uniforme de los $k$ sombreros. Sean $p_{k,j}$ la probabilidad de que exactamente $j$ personas saquen su propio sombrero (es decir, la permutación tenga exactamente $j$ puntos fijos):
+
+$$p_{k,j} = \binom{k}{j} \frac{D_{k-j}}{k!}$$
+
+donde $D_m$ es el número de desarreglos de $m$ elementos.
+
+Tras la ronda, quedan $k-j$ personas. Usando $E_0 = 0$:
+
+$$E_k = 1 + \sum_{j=0}^{k} p_{k,j} \cdot E_{k-j}$$
+
+**Paso 3 — Demostración de que $E_k = k$ por inducción.**
+
+Hipótesis inductiva: $E_m = m$ para todo $m < k$. Entonces $E_{k-j} = k-j$ para $j = 0, 1, \ldots, k-1$, y $E_0 = 0$. Sustituyendo:
+
+$$E_k = 1 + \sum_{j=0}^{k-1} p_{k,j} (k-j) = 1 + k\sum_{j=0}^{k-1} p_{k,j} - \sum_{j=0}^{k-1} j \cdot p_{k,j}$$
+
+Calculamos cada término por separado.
+
+**Término 1:** $\displaystyle\sum_{j=0}^{k-1} p_{k,j} = 1 - p_{k,k} = 1 - \frac{1}{k!}$
+
+(la suma de todas las probabilidades es 1, menos la de la identidad).
+
+**Término 2:** Usamos que la esperanza del número de puntos fijos de una permutación aleatoria de $k$ elementos es 1:
+
+$$\sum_{j=0}^{k} j \cdot p_{k,j} = E[\text{puntos fijos}] = 1$$
+
+El término $j = k$ contribuye $k \cdot p_{k,k} = k \cdot \frac{1}{k!} = \frac{1}{(k-1)!}$. Por lo tanto:
+
+$$\sum_{j=0}^{k-1} j \cdot p_{k,j} = 1 - \frac{1}{(k-1)!}$$
+
+**Sustituyendo en la recursión:**
+
+$$E_k = 1 + k\!\left(1 - \frac{1}{k!}\right) - \left(1 - \frac{1}{(k-1)!}\right)$$
+
+$$= 1 + k - \frac{k}{k!} - 1 + \frac{1}{(k-1)!}$$
+
+$$= k - \frac{1}{(k-1)!} + \frac{1}{(k-1)!} = k \quad \checkmark$$
+
+**Paso 4 — ¿Por qué $E[\text{puntos fijos}] = 1$?**
+
+Sea $X_i = \mathbf{1}[\text{persona } i \text{ saca su propio sombrero}]$. Por simetría, $P(X_i = 1) = 1/k$ para cada $i$. Por linealidad de la esperanza:
+
+$$E\!\left[\sum_{i=1}^k X_i\right] = \sum_{i=1}^k \frac{1}{k} = 1$$
+
+Este resultado vale para **cualquier** $k \geq 1$, sin importar si las $X_i$ son independientes o no.
+
+---
+
+#### Resultado
+
+$$\boxed{E[T] = N}$$
+
+La esperanza del número de rondas necesarias es exactamente $N$.
+
+---
+
+#### Tabla de casos pequeños
+
+| $N$ | $P(T=1)$ | $P(T=2)$ | $E[T]$ |
+|:---:|:---:|:---:|:---:|
+| 1 | $1$ | $0$ | $1$ |
+| 2 | $\frac{1}{2}$ | $\frac{1}{4}$ | $2$ |
+| 3 | $\frac{1}{6}$ | $\frac{1}{3}$ | $3$ |
+| 4 | $\frac{1}{24}$ | — | $4$ |
+
+Para $N = 3$: con prob $1/6$ todos salen en ronda 1 (identidad); con prob $1/2$ queda un par (que tarda en promedio 2 rondas más); con prob $1/3$ nadie sale y se repite. La recursión da $E_3 = 3$.
+
+---
+
+#### Generalización
+
+El resultado $E_k = k$ dice que en promedio **se necesita exactamente una ronda por persona**. Esto es consistente con la intuición de que "en promedio sale una persona por ronda" — pero esa tasa se mantiene constante porque la cantidad de personas va decreciendo junto con la cantidad de rondas restantes. El proceso es, en cierto sentido, perfectamente balanceado.
+
 ---
 
 ## Ejercicio 10.
 En Probalandia si llueve un día la probabilidad de que llueva al siguiente es 50%, mientras que si un día no llueve la probabilidad de que llueva al siguiente es 10%. ¿Cuántos días al año llueve en promedio?
+
+### Solución
+
+#### ¿Por qué hay que tener cuidado con la intuición?
+
+La intuición podría decir: "llueve el 10% de los días secos y el 50% de los días lluviosos; como llueve poco, la mayoría son días secos, entonces llueve cerca del 10%". Pero este razonamiento es circular: para saber cuánto pesa cada probabilidad hay que saber cuántos días son lluviosos, que es justo lo que queremos calcular.
+
+La forma correcta es encontrar la **distribución estacionaria** de la cadena de Markov que describe el clima.
+
+---
+
+#### Idea clave: distribución estacionaria de una cadena de Markov
+
+El clima de Probalandia es un proceso con memoria de un día: el estado de mañana depende solo del estado de hoy. Esto es una **cadena de Markov** de dos estados.
+
+La distribución estacionaria $(\pi_L, \pi_S)$ es la fracción de días que el sistema pasa en cada estado a largo plazo. Se obtiene resolviendo el sistema de balance.
+
+---
+
+#### Resolución paso a paso
+
+**Paso 1 — Definir los estados y las probabilidades de transición.**
+
+| Estado actual | $\to$ Lluvia | $\to$ Seco |
+|:---:|:---:|:---:|
+| Lluvia (L) | $0.5$ | $0.5$ |
+| Seco (S) | $0.1$ | $0.9$ |
+
+**Paso 2 — Ecuaciones de estacionariedad.**
+
+La distribución $(\pi_L, \pi_S)$ debe satisfacer $\pi = \pi P$, es decir, las probabilidades de flujo entrante y saliente se equilibran:
+
+$$\pi_L = 0.5\,\pi_L + 0.1\,\pi_S$$
+$$\pi_S = 0.5\,\pi_L + 0.9\,\pi_S$$
+$$\pi_L + \pi_S = 1$$
+
+Las dos primeras ecuaciones son equivalentes (una se deduce de la otra usando la tercera), así que trabajamos con la primera y la normalización.
+
+**Paso 3 — Resolver el sistema.**
+
+De la primera ecuación:
+
+$$\pi_L - 0.5\,\pi_L = 0.1\,\pi_S$$
+$$0.5\,\pi_L = 0.1\,\pi_S$$
+$$\frac{\pi_L}{\pi_S} = \frac{0.1}{0.5} = \frac{1}{5}$$
+
+Con $\pi_L + \pi_S = 1$:
+
+$$\pi_L = \frac{1}{6}, \qquad \pi_S = \frac{5}{6}$$
+
+**Paso 4 — Días de lluvia por año.**
+
+A largo plazo, llueve en una fracción $\pi_L = \frac{1}{6}$ de los días. En un año de 365 días:
+
+$$\boxed{E[\text{días de lluvia}] = 365 \times \frac{1}{6} = \frac{365}{6} \approx 60.8 \text{ días}}$$
+
+---
+
+#### Interpretación por balance de flujos
+
+La distribución estacionaria tiene una interpretación directa: el flujo de días "seco → lluvia" debe igualar el flujo "lluvia → seco" (condición de balance global):
+
+$$\underbrace{\pi_S \cdot 0.1}_{\text{seco} \to \text{lluvia}} = \underbrace{\pi_L \cdot 0.5}_{\text{lluvia} \to \text{seco}}$$
+
+$$\frac{5}{6} \cdot 0.1 = \frac{1}{6} \cdot 0.5 \quad\Longrightarrow\quad \frac{1}{12} = \frac{1}{12} \checkmark$$
+
+En promedio, por cada día que "entra" a ser lluvioso, hay exactamente un día que "sale". El sistema está en equilibrio.
+
+---
+
+#### Tabla: sensibilidad al parámetro $p = P(L \mid S)$
+
+¿Qué pasa si cambia la probabilidad de lluvia en días secos? Con $P(L \mid L) = 0.5$ fijo:
+
+| $P(L \mid S)$ | $\pi_L = \frac{p}{0.5 + p}$ | Días/año |
+|:---:|:---:|:---:|
+| 0.05 | $\frac{1}{11} \approx 9.1\%$ | $\approx 33$ |
+| **0.10** | $\mathbf{\frac{1}{6} \approx 16.7\%}$ | $\mathbf{\approx 61}$ |
+| 0.20 | $\frac{2}{7} \approx 28.6\%$ | $\approx 104$ |
+| 0.50 | $\frac{1}{2} = 50\%$ | $\approx 183$ |
+
+Cuando $P(L \mid S) = P(L \mid L) = 0.5$, los días son independientes y llueve exactamente la mitad del tiempo.
+
+---
+
+#### Generalización
+
+Para una cadena de Markov de dos estados con parámetros $\alpha = P(L \mid L)$ y $\beta = P(L \mid S)$, la distribución estacionaria es:
+
+$$\pi_L = \frac{\beta}{(1-\alpha) + \beta}, \qquad \pi_S = \frac{1-\alpha}{(1-\alpha) + \beta}$$
+
+En este problema: $\alpha = 0.5$, $\beta = 0.1$, por lo que $\pi_L = \frac{0.1}{0.5 + 0.1} = \frac{1}{6}$.
 
 ---
 
 ## Ejercicio 11.
 Se tira una moneda balanceada repetidamente. ¿Cuál es la esperanza para la cantidad de tiradas hasta obtener dos caras seguidas? ¿Y una cara seguida de una ceca?
 
+### Solución
+
+#### ¿Por qué es sorprendente?
+
+Ambos patrones — CC (cara-cara) y CS (cara-seca) — tienen la misma probabilidad de ocurrir en dos tiradas consecutivas: $\frac{1}{4}$. La intuición dice que ambos deberían tardar lo mismo en aparecer. Sin embargo:
+
+$$E[\text{tiradas hasta CC}] = 6 \qquad E[\text{tiradas hasta CS}] = 4$$
+
+Dos patrones igualmente probables requieren esperas distintas. La diferencia está en cómo cada patrón "aprovecha" los intentos fallidos.
+
+---
+
+#### Idea clave: cadena de Markov de estados de progreso
+
+Modelamos el proceso como una cadena de Markov donde el estado registra cuánto del patrón ya fue logrado. Planteamos ecuaciones para la esperanza de tiradas desde cada estado y resolvemos el sistema.
+
+---
+
+#### Parte 1 — Esperanza para CC (cara-cara)
+
+**Estados:**
+
+- **Estado 0 (∅):** inicio, o el último resultado fue seca (ningún progreso hacia CC).
+- **Estado 1 (C):** el último resultado fue cara (un paso avanzado).
+- **Estado 2 (CC):** meta alcanzada (absorbente).
+
+**Diagrama de transiciones:**
+
+$$\emptyset \xrightarrow{C,\;1/2} C \xrightarrow{C,\;1/2} \text{CC (fin)}$$
+$$\emptyset \xrightarrow{S,\;1/2} \emptyset \qquad C \xrightarrow{S,\;1/2} \emptyset$$
+
+**Ecuaciones** (sea $E_0$, $E_1$ la esperanza de tiradas restantes desde cada estado):
+
+$$E_0 = 1 + \frac{1}{2} E_1 + \frac{1}{2} E_0$$
+$$E_1 = 1 + \frac{1}{2} \cdot 0 + \frac{1}{2} E_0$$
+
+De la segunda: $E_1 = 1 + \frac{1}{2} E_0$.
+
+Sustituyendo en la primera:
+
+$$E_0 = 1 + \frac{1}{2}\!\left(1 + \frac{1}{2}E_0\right) + \frac{1}{2} E_0 = \frac{3}{2} + \frac{3}{4} E_0$$
+
+$$\frac{1}{4} E_0 = \frac{3}{2} \implies E_0 = 6, \quad E_1 = 4$$
+
+$$\boxed{E[\text{tiradas hasta CC}] = 6}$$
+
+**¿Por qué tarda tanto?** Al obtener una seca en el estado C (cuando ya teníamos una cara), no solo perdemos ese intento — volvemos al estado 0 y perdemos todo el progreso. Esto hace que el patrón CC sea "frágil": una seca en cualquier punto reinicia desde cero.
+
+---
+
+#### Parte 2 — Esperanza para CS (cara-seca)
+
+**Estados:**
+
+- **Estado 0 (∅):** inicio, o el último resultado fue seca tras no haber avanzado.
+- **Estado 1 (C):** el último resultado fue cara (primer paso logrado).
+- **Estado 2 (CS):** meta alcanzada (absorbente).
+
+**Diagrama de transiciones:**
+
+$$\emptyset \xrightarrow{C,\;1/2} C \xrightarrow{S,\;1/2} \text{CS (fin)}$$
+$$\emptyset \xrightarrow{S,\;1/2} \emptyset \qquad C \xrightarrow{C,\;1/2} C$$
+
+La diferencia crucial: obtener otra cara en el estado C **no reinicia** — seguimos en el estado C con una cara fresca lista.
+
+**Ecuaciones:**
+
+$$E_0 = 1 + \frac{1}{2} E_1 + \frac{1}{2} E_0$$
+$$E_1 = 1 + \frac{1}{2} \cdot 0 + \frac{1}{2} E_1$$
+
+De la segunda: $\frac{1}{2} E_1 = 1 \implies E_1 = 2$.
+
+Sustituyendo en la primera:
+
+$$E_0 = 1 + \frac{1}{2} \cdot 2 + \frac{1}{2} E_0 = 2 + \frac{1}{2} E_0$$
+
+$$\frac{1}{2} E_0 = 2 \implies E_0 = 4$$
+
+$$\boxed{E[\text{tiradas hasta CS}] = 4}$$
+
+**¿Por qué tarda menos?** Una cara extra en el estado C no es un retroceso — sigue siendo útil como inicio del patrón. El patrón CS es más "robusto" a los intentos fallidos.
+
+---
+
+#### Comparación de los dos patrones
+
+| | CC | CS |
+|:---|:---:|:---:|
+| Probabilidad en 2 tiradas | $1/4$ | $1/4$ |
+| $E[\text{tiradas}]$ | $6$ | $4$ |
+| Si falla a mitad… | vuelve a estado 0 | queda en estado 1 |
+
+La asimetría se debe a la **auto-solapabilidad** del patrón:
+
+- CC se solapa consigo mismo: la segunda C de un intento fallido podría ser la primera C del próximo. Pero una seca lo destruye todo.
+- CS no se solapa: una seca al final completa el patrón; una cara extra mantiene el progreso.
+
+---
+
+#### Tabla: trayectorias posibles para CC
+
+| Resultado | Prob | ¿Sale? |
+|:---:|:---:|:---:|
+| CC | $1/4$ | Sí, en 2 tiradas |
+| CS, SC, SS luego CC | variable | No de inmediato |
+
+Promediando sobre todas las trayectorias, la espera es 6.
+
+---
+
+#### Generalización
+
+Para un patrón de longitud $\ell$, la esperanza de espera depende de las **auto-correlaciones** del patrón (si el patrón se solapa consigo mismo). Esto conecta con la teoría de martingalas y con el algoritmo de Conway-Gardner para calcular tiempos de espera de patrones arbitrarios.
+
+En general, para patrones de longitud $\ell$ con una moneda equilibrada:
+
+$$E[\text{tiradas}] = \sum_{k=1}^{\ell} 2^k \cdot \mathbf{1}[\text{los primeros } k \text{ símbolos del patrón coinciden con los últimos } k]$$
+
+Para CC: coincidencia en $k=1$ (C=C) y $k=2$ (CC=CC) → $E = 2^1 + 2^2 = 2 + 4 = 6$. ✓
+
+Para CS: solo coincidencia en $k=2$ (CS=CS) → $E = 2^2 = 4$. ✓
+
 ---
 
 ## Ejercicio 12.
 Un mono pulsa teclas al azar de una máquina de escribir indefinidamente. ¿Cuál es la probabilidad de que eventualmente escriba ABRACADABRA? ¿Cuál es la esperanza para el tiempo que demora en tipear ABRACADABRA?
+
+### Solución
+
+#### ¿Por qué es sorprendente?
+
+Hay dos sorpresas. La primera es que la probabilidad de escribir ABRACADABRA es **1** — el mono lo escribe con certeza, aunque la chance de lograrlo en 11 teclas es $(1/26)^{11} \approx 10^{-15}$.
+
+La segunda sorpresa viene al comparar ABRACADABRA con otra palabra de la misma longitud, digamos ABRACADABRC. Ambas tienen exactamente la misma probabilidad de aparecer en cualquier momento dado, pero sus **tiempos de espera esperados son distintos**. La razón, igual que en el ejercicio anterior, es la auto-solapabilidad del patrón.
+
+---
+
+#### Idea clave: auto-solapabilidad del patrón + argumento del casino
+
+El tiempo de espera depende de cuánto se solapa ABRACADABRA consigo mismo. Para calcularlo elegantemente, usamos un argumento de martingala: imaginamos un casino donde en cada instante entra un nuevo apostador que apuesta secuencialmente a las letras del patrón. Al tiempo de parada, los apostadores "sobrevivientes" son exactamente los que comenzaron en posiciones de solapamiento.
+
+---
+
+#### Parte 1 — Probabilidad de que eventualmente aparezca ABRACADABRA
+
+Dividimos la secuencia infinita de teclas en **bloques no solapados** de 11 caracteres: posiciones $1$–$11$, posiciones $12$–$22$, posiciones $23$–$33$, …
+
+La probabilidad de que un bloque específico sea exactamente ABRACADABRA es:
+
+$$p = \left(\frac{1}{26}\right)^{11} > 0$$
+
+Los bloques son independientes entre sí. La probabilidad de que ABRACADABRA **no aparezca** en ninguno de los primeros $N$ bloques es:
+
+$$\left(1 - \frac{1}{26^{11}}\right)^N \xrightarrow{N \to \infty} 0$$
+
+Por lo tanto:
+
+$$\boxed{P(\text{el mono eventualmente escribe ABRACADABRA}) = 1}$$
+
+Esto vale para cualquier palabra de longitud finita sobre un alfabeto finito: el mono la escribe con probabilidad 1. (Este es el *Teorema del Mono Infinito*.)
+
+---
+
+#### Parte 2 — Tiempo esperado: auto-solapamientos de ABRACADABRA
+
+**Paso 1 — Identificar los solapamientos.**
+
+Escribimos el patrón con índices:
+
+$$\underbrace{A}_{1}\underbrace{B}_{2}\underbrace{R}_{3}\underbrace{A}_{4}\underbrace{C}_{5}\underbrace{A}_{6}\underbrace{D}_{7}\underbrace{A}_{8}\underbrace{B}_{9}\underbrace{R}_{10}\underbrace{A}_{11}$$
+
+Buscamos todos los $k \in \{1, \ldots, 11\}$ tales que el **prefijo de longitud $k$** coincide con el **sufijo de longitud $k$**:
+
+| $k$ | Prefijo | Sufijo | ¿Coinciden? |
+|:---:|:---:|:---:|:---:|
+| 1 | A | A | ✓ |
+| 2 | AB | RA | ✗ |
+| 3 | ABR | BRA | ✗ |
+| 4 | ABRA | ABRA | ✓ |
+| 5 | ABRAC | DABRA | ✗ |
+| 6–10 | — | — | ✗ |
+| 11 | ABRACADABRA | ABRACADABRA | ✓ (siempre) |
+
+Los solapamientos están en $k = 1$, $k = 4$ y $k = 11$.
+
+**Paso 2 — El argumento del casino (martingala).**
+
+En cada instante $t$, un nuevo apostador entra al casino con \$1 y apuesta secuencialmente:
+- Apuesta sus \$1 a que la tecla $t$ es 'A'. Si acierta, gana \$26 (su dinero se multiplica por 26). Si falla, pierde todo y sale.
+- Si ganó, apuesta sus \$26 a que la tecla $t+1$ es 'B'. Si acierta, tiene \$26². Etc.
+- Continúa hasta completar ABRACADABRA o perder.
+
+Al tiempo $T$ en que ABRACADABRA aparece por primera vez, los apostadores que aún están vivos (ganando) son exactamente los que empezaron en una posición de solapamiento:
+
+- El apostador que entró en el instante $T - 10$ completó los 11 pasos: tiene $26^{11}$.
+- El apostador que entró en el instante $T - 3$ completó 4 pasos (las últimas 4 letras = ABRA = prefijo de longitud 4): tiene $26^4$.
+- El apostador que entró en el instante $T$ completó 1 paso (la última letra = A = prefijo de longitud 1): tiene $26^1$.
+
+El casino recibió \$1 de cada uno de los $T$ apostadores que entraron. El proceso total es una martingala, así que por el teorema de parada opcional:
+
+$$E[T] = E[\text{pago total al tiempo } T] = 26^{11} + 26^4 + 26^1$$
+
+**Paso 3 — Resultado.**
+
+$$\boxed{E[T] = 26^{11} + 26^4 + 26 = 3{,}670{,}344{,}486{,}987{,}776 + 456{,}976 + 26 \approx 3.67 \times 10^{15} \text{ teclas}}$$
+
+---
+
+#### Comparación con otra palabra de 11 letras
+
+Tomemos ABRACADABRC (sin solapamiento consigo misma salvo el trivial $k=11$):
+
+$$E[T_{\text{ABRACADABRC}}] = 26^{11} \approx 3.67 \times 10^{15}$$
+
+$$E[T_{\text{ABRACADABRA}}] = 26^{11} + 26^4 + 26 \approx 3.67 \times 10^{15} + 457{,}002$$
+
+ABRACADABRA tarda *más* que ABRACADABRC. Su auto-solapamiento hace que cuando casi terminás pero fallás, parte del progreso queda aprovechado — pero también hace que cuando aparece por primera vez, haya apostadores extra que cobran, lo que eleva la esperanza.
+
+---
+
+#### Fórmula general (de Conway)
+
+Para cualquier patrón $W = w_1 w_2 \ldots w_n$ sobre un alfabeto de tamaño $m$:
+
+$$E[T_W] = \sum_{\substack{k=1 \\ w_1\cdots w_k = w_{n-k+1}\cdots w_n}}^{n} m^k$$
+
+La suma recorre todos los $k$ en que el prefijo de longitud $k$ coincide con el sufijo de longitud $k$.
+
+| Patrón | Longitud | Solapamientos | $E[T]$ |
+|:---:|:---:|:---:|:---:|
+| HH (moneda) | 2 | $k=1,2$ | $2^1 + 2^2 = 6$ |
+| HT (moneda) | 2 | $k=2$ | $2^2 = 4$ |
+| ABRACADABRA | 11 | $k=1,4,11$ | $26^{11} + 26^4 + 26$ |
+| ABRACADABRC | 11 | $k=11$ | $26^{11}$ |
 
 ---
 
 ## Ejercicio 13.
 Se eligen tres puntos aleatoriamente en el círculo unitario. Estos determinan tres arcos, ¿cuál es la esperanza de la longitud del arco que contiene al $(1, 0)$?
 
+### Solución
+
+#### ¿Por qué es sorprendente?
+
+Los tres arcos determinados por los puntos aleatorios tienen, en promedio, longitud $\frac{2\pi}{3}$ cada uno (un tercio de la circunferencia). La intuición dice que el arco que contiene a $(1, 0)$ debería ser uno de esos tres arcos "típicos", con esperanza $\frac{2\pi}{3}$.
+
+Sin embargo, el resultado es $\pi$ — **la mitad de la circunferencia**, que es $\frac{3}{2}$ veces el promedio de los arcos. El arco que contiene a $(1,0)$ es más largo en promedio porque $(1,0)$ tiene mayor probabilidad de caer en los arcos más grandes. Este es el **sesgo por tamaño** (size bias).
+
+---
+
+#### Idea clave: estadísticos de orden + sesgo por tamaño
+
+El punto $(1,0)$ es fijo, no aleatorio. Por eso el arco que lo contiene no es un arco elegido al azar entre los tres — es el arco "más tentador" para contenerlo, y los arcos grandes lo contienen con más frecuencia. Calculamos la esperanza directamente via estadísticos de orden.
+
+---
+
+#### Resolución paso a paso
+
+**Paso 1 — Parametrización.**
+
+Parametrizamos el círculo unitario por el ángulo $\theta \in [0, 2\pi)$, con $(1,0)$ en $\theta = 0$. Los tres puntos aleatorios tienen ángulos $\Theta_1, \Theta_2, \Theta_3$ independientes y uniformes en $[0, 2\pi)$.
+
+Sean $\Theta_{(1)} \leq \Theta_{(2)} \leq \Theta_{(3)}$ los estadísticos de orden (ángulos ordenados).
+
+**Paso 2 — Longitud del arco que contiene a $\theta = 0$.**
+
+El arco que contiene a $\theta = 0$ va desde $\Theta_{(3)}$ (el último punto en sentido antihorario antes de volver a 0) hasta $\Theta_{(1)}$ (el primer punto en sentido antihorario después de 0). Su longitud es:
+
+$$L = \Theta_{(1)} + \bigl(2\pi - \Theta_{(3)}\bigr)$$
+
+El primer sumando es la distancia de 0 al primer punto en sentido antihorario, y el segundo es la distancia del último punto a 0 dando la vuelta.
+
+**Paso 3 — Esperanza de los estadísticos de orden.**
+
+Para $n = 3$ variables uniformes en $[0, 2\pi)$:
+
+$$E[\Theta_{(k)}] = \frac{k}{n+1} \cdot 2\pi = \frac{k}{4} \cdot 2\pi$$
+
+Entonces:
+
+$$E[\Theta_{(1)}] = \frac{2\pi}{4} = \frac{\pi}{2}, \qquad E[\Theta_{(3)}] = \frac{3 \cdot 2\pi}{4} = \frac{3\pi}{2}$$
+
+**Paso 4 — Esperanza de la longitud del arco.**
+
+Por linealidad de la esperanza:
+
+$$E[L] = E[\Theta_{(1)}] + 2\pi - E[\Theta_{(3)}] = \frac{\pi}{2} + 2\pi - \frac{3\pi}{2} = \frac{\pi}{2} + \frac{\pi}{2}$$
+
+$$\boxed{E[L] = \pi}$$
+
+La mitad de la circunferencia del círculo unitario.
+
+---
+
+#### Interpretación: sesgo por tamaño
+
+¿Por qué $\pi$ y no $\frac{2\pi}{3}$? El punto $(1,0)$ es fijo, y un punto fijo cae en el arco $i$ con probabilidad proporcional a su longitud $L_i$. Entonces el arco seleccionado no es uno al azar — está sesgado hacia los arcos más largos.
+
+Formalmente, si los arcos tienen longitudes $L_1, L_2, L_3$ (con $L_1 + L_2 + L_3 = 2\pi$), entonces $(1,0)$ cae en el arco $i$ con probabilidad $L_i / (2\pi)$. La esperanza de la longitud del arco que lo contiene es:
+
+$$E[L] = \sum_{i=1}^{3} E\!\left[L_i \cdot \frac{L_i}{2\pi}\right] = \frac{E[L_1^2 + L_2^2 + L_3^2]}{2\pi}$$
+
+Los arcos $(L_1/2\pi, L_2/2\pi, L_3/2\pi)$ se distribuyen como $\text{Dirichlet}(1,1,1)$ (uniforme en el símplex). Para esta distribución: $E[x_i^2] = \frac{1 \cdot 2}{3 \cdot 4} = \frac{1}{6}$. Por lo tanto:
+
+$$E[L_i^2] = (2\pi)^2 \cdot \frac{1}{6} = \frac{2\pi^2}{3}$$
+
+$$E[L] = \frac{3 \cdot \frac{2\pi^2}{3}}{2\pi} = \frac{2\pi^2}{2\pi} = \pi \checkmark$$
+
+---
+
+#### Tabla: comparación entre arco aleatorio y arco con sesgo
+
+| | Arco aleatorio | Arco que contiene $(1,0)$ |
+|:---|:---:|:---:|
+| Esperanza de longitud | $\dfrac{2\pi}{3} \approx 2.09$ | $\pi \approx 3.14$ |
+| Fracción de la circunferencia | $\dfrac{1}{3}$ | $\dfrac{1}{2}$ |
+| Factor de sesgo | $1$ | $\dfrac{3}{2}$ |
+
+El factor $3/2$ coincide con $\frac{E[L_i^2]}{E[L_i]^2} = \frac{2\pi^2/3}{(2\pi/3)^2} = \frac{3}{2}$, que es el factor de inflación estándar por sesgo de tamaño.
+
+---
+
+#### Generalización
+
+Para $n$ puntos uniformes en un círculo, la longitud esperada del arco que contiene a un punto fijo es:
+
+$$E[L] = \frac{2}{n+1} \cdot \pi = \frac{2\pi}{n+1} \cdot \frac{n}{2} \cdot \frac{2}{n} $$
+
+Más directo: con $n$ puntos, los estadísticos de orden satisfacen $E[\Theta_{(1)}] = \frac{2\pi}{n+1}$ y $E[\Theta_{(n)}] = \frac{n \cdot 2\pi}{n+1}$, así:
+
+$$E[L] = \frac{2\pi}{n+1} + 2\pi - \frac{n \cdot 2\pi}{n+1} = \frac{2 \cdot 2\pi}{n+1} = \frac{4\pi}{n+1}$$
+
+Para $n=3$: $E[L] = \frac{4\pi}{4} = \pi$. ✓
+
+Cuando $n \to \infty$, el arco esperado se achica como $4\pi/(n+1)$ pero siempre es el doble del arco promedio $2\pi/n$ (el factor de sesgo tiende a 2).
+
 ---
 
 ## Ejercicio 14. (Paradoja del inspector)
 Charly y Tincho están a cargo de medir la frecuencia del 107. Tincho se acerca en momentos al azar a la parada, espera que venga un colectivo y luego controla cuanto tiempo tarda en venir el siguiente. Charly se enteró que el quiosquero anota cada vez que pasa un colectivo. Entonces va a la parada en momentos al azar, le pregunta al quiosquero cuándo pasó el último colectivo, espera que venga el siguiente y calcula la diferencia entre esos tiempos. Ambos calculan la frecuencia tomando promedio de sus mediciones. ¿Van a obtener el mismo promedio a la larga?
+
+### Solución
+
+#### ¿Por qué es paradójico?
+
+La intuición dice que ambos miden "el tiempo entre dos colectivos consecutivos", así que deberían obtener el mismo promedio. Charly mide un intervalo entero (del último al siguiente), Tincho mide solo la segunda mitad (del arribo al siguiente) — así que a lo sumo los promedios difieren por un factor constante.
+
+La trampa es más profunda: **el intervalo que Charly observa no es un intervalo típico**. Al llegar en un momento al azar, Charly tiene mayor probabilidad de caer dentro de un intervalo largo. Es exactamente el mismo sesgo por tamaño del Ejercicio 13: los arcos más grandes son más propensos a contener un punto fijo.
+
+El resultado: **no, no obtienen el mismo promedio**. Charly siempre obtiene el doble que Tincho.
+
+---
+
+#### Idea clave: sesgo por tamaño (size bias)
+
+Al llegar en un instante aleatorio, la probabilidad de caer en el intervalo $[t_k, t_{k+1}]$ es proporcional a su longitud $X_k = t_{k+1} - t_k$. Los intervalos largos se ven con más frecuencia — igual que en el Ejercicio 13, donde el arco que contiene a $(1,0)$ es más largo en promedio.
+
+---
+
+#### Resolución paso a paso
+
+Modelamos los colectivos como un **proceso de renovación**: los tiempos entre colectivos son variables aleatorias i.i.d. $X_1, X_2, \ldots$ con media $\mu = E[X]$ y segundo momento $E[X^2]$.
+
+**¿Qué mide cada uno?**
+
+Sea $T$ el instante (aleatorio, uniforme) en que cada uno llega a la parada. Hay un intervalo entre colectivos que contiene a $T$: el anterior llegó en $t_-$ y el siguiente llegará en $t_+$.
+
+- **Tincho** mide: $t_+ - T$ (tiempo de espera hacia adelante = *tiempo de recurrencia hacia adelante*).
+- **Charly** mide: $t_+ - t_-$ (longitud total del intervalo que contiene a $T$).
+
+La medición de Charly es exactamente el doble conceptual: es el intervalo completo, mientras que Tincho mide solo la mitad derecha.
+
+**Paso 1 — Distribución del intervalo observado (sesgo por tamaño).**
+
+La probabilidad de que el instante $T$ caiga en el intervalo de longitud $x$ es proporcional a $x$. Entonces la longitud $\tilde{X}$ del intervalo que ve Charly tiene distribución **size-biased** de $X$:
+
+$$P(\tilde{X} \in dx) = \frac{x}{\mu} f_X(x)\,dx$$
+
+Su esperanza es:
+
+$$E[\tilde{X}] = \int_0^\infty x \cdot \frac{x}{\mu} f_X(x)\,dx = \frac{E[X^2]}{\mu}$$
+
+**Paso 2 — Esperanza de la medición de Tincho.**
+
+Dado que el intervalo observado tiene longitud $\tilde{X}$, el arribo de Tincho cae uniformemente dentro de ese intervalo (condicional en $\tilde{X}$). Por lo tanto, su tiempo de espera es $\text{Uniform}(0, \tilde{X})$, con esperanza $\tilde{X}/2$. En total:
+
+$$E[\text{Tincho}] = E\!\left[\frac{\tilde{X}}{2}\right] = \frac{E[\tilde{X}]}{2} = \frac{E[X^2]}{2\mu}$$
+
+**Paso 3 — Comparación.**
+
+$$\frac{E[\text{Charly}]}{E[\text{Tincho}]} = \frac{E[X^2]/\mu}{E[X^2]/(2\mu)} = 2$$
+
+$$\boxed{E[\text{Charly}] = 2 \cdot E[\text{Tincho}] \quad \text{siempre}}$$
+
+Los promedios nunca son iguales: Charly siempre obtiene exactamente el doble que Tincho, independientemente de la distribución de los tiempos entre colectivos.
+
+---
+
+#### Caso concreto: colectivos con proceso de Poisson
+
+Si los colectivos llegan como proceso de Poisson con tasa $\lambda$ (tiempos entre llegadas $X \sim \text{Exp}(\lambda)$), entonces $\mu = 1/\lambda$ y $E[X^2] = 2/\lambda^2$.
+
+**Tincho** (propiedad de falta de memoria de la exponencial): llega en un momento aleatorio y espera al próximo colectivo. Como la exponencial no tiene memoria, su espera es $\text{Exp}(\lambda)$ sin importar cuándo llegó:
+
+$$E[\text{Tincho}] = \frac{1}{\lambda} = \mu \quad \checkmark \text{ (estimación correcta)}$$
+
+**Charly** mide el intervalo completo que contiene su arribo. El intervalo observado tiene distribución size-biased de $\text{Exp}(\lambda)$, que resulta ser $\text{Gamma}(2, \lambda)$ con media $2/\lambda$:
+
+$$E[\text{Charly}] = \frac{E[X^2]}{\mu} = \frac{2/\lambda^2}{1/\lambda} = \frac{2}{\lambda} = 2\mu \quad \text{(sobreestima por un factor 2)}$$
+
+---
+
+#### Tabla comparativa
+
+| Distribución $X$ | $\mu = E[X]$ | $E[\text{Tincho}]$ | $E[\text{Charly}]$ | Factor de sesgo |
+|:---|:---:|:---:|:---:|:---:|
+| Determinista ($X = \mu$ siempre) | $\mu$ | $\mu/2$ | $\mu$ | 1 |
+| Exponencial (Poisson) | $1/\lambda$ | $1/\lambda$ | $2/\lambda$ | 2 |
+| General | $\mu$ | $\dfrac{E[X^2]}{2\mu}$ | $\dfrac{E[X^2]}{\mu}$ | 2 |
+
+En el caso determinista (colectivos perfectamente regulares), Tincho subestima a la mitad (llega a mitad de intervalo en promedio) y Charly acierta. En el Poisson, Tincho acierta y Charly sobreestima al doble. En todos los casos, Charly = 2 × Tincho.
+
+---
+
+#### Conexión con el Ejercicio 13
+
+Este ejercicio es la versión temporal del Ejercicio 13. En aquel ejercicio, el arco que contiene al punto fijo $(1,0)$ tiene esperanza $\pi$ (el doble del arco promedio $2\pi/3$) porque los arcos más largos "atrapan" al punto con mayor probabilidad. Aquí, el intervalo que contiene al instante aleatorio $T$ tiene esperanza $E[X^2]/\mu \geq \mu$ por la misma razón. El sesgo por tamaño es el mismo fenómeno.
+
+---
+
+#### Generalización
+
+Para cualquier distribución de $X$ con $\text{CV}^2 = \text{Var}(X)/E[X]^2$:
+
+$$E[\text{Charly}] = \mu (1 + \text{CV}^2) \geq \mu$$
+
+$$E[\text{Tincho}] = \frac{\mu}{2}(1 + \text{CV}^2)$$
+
+El factor $1 + \text{CV}^2 \geq 1$ es la inflación por variabilidad: cuanto más irregulares los colectivos, mayor el sesgo. Para colectivos perfectamente regulares ($\text{CV} = 0$), Charly mide exactamente $\mu$ y Tincho mide $\mu/2$.
 
 ---
 
 ## Ejercicio 15.
 Se eligen dos puntos aleatoriamente en el intervalo $[0, 1]$. Estos determinan tres segmentos, ¿cuál es la probabilidad de que se pueda formar un triángulo con dichos segmentos?
 
+### Solución
+
+#### ¿Por qué es sorprendente?
+
+La intuición dice que la mayoría de las veces los tres segmentos "se ven razonables" y deberían poder formar un triángulo. Al fin y al cabo, los puntos son aleatorios y nada los fuerza a crear un segmento enorme. Sin embargo, la probabilidad es solo $\frac{1}{4}$.
+
+La trampa es que para que NO haya triángulo, basta con que **uno solo** de los tres segmentos sea mayor que $\frac{1}{2}$. Eso ocurre con probabilidad $\frac{3}{4}$.
+
+---
+
+#### Idea clave: desigualdad triangular simplificada
+
+Si los tres segmentos tienen longitudes $a, b, c$ con $a + b + c = 1$, las tres desigualdades triangulares ($a+b>c$, $a+c>b$, $b+c>a$) se reducen a una sola condición:
+
+$$\text{triángulo posible} \iff a < \tfrac{1}{2},\ b < \tfrac{1}{2},\ c < \tfrac{1}{2}$$
+
+Esto es porque, por ejemplo, $b + c > a$ equivale a $(1 - a) > a$, es decir, $a < \frac{1}{2}$.
+
+El problema se reduce a: **¿cuál es la probabilidad de que ningún trozo supere la mitad?**
+
+---
+
+#### Resolución paso a paso
+
+Sean $U, V$ independientes y uniformes en $[0,1]$. Los dos puntos crean tres segmentos de longitudes $a = \min(U,V)$, $b = |U-V|$, $c = 1 - \max(U,V)$.
+
+**Enfoque 1 — Coordenadas (cálculo directo).**
+
+Por simetría, basta considerar el caso $U < V$ (que ocurre con prob $\frac{1}{2}$, y el caso $V < U$ es idéntico). Entonces $a = U$, $b = V - U$, $c = 1 - V$, y las condiciones son:
+
+$$U < \tfrac{1}{2}, \qquad V - U < \tfrac{1}{2}, \qquad V > \tfrac{1}{2}$$
+
+La última condición ($c < 1/2$) equivale a $V > 1/2$. Dado $U < V$, como $U < 1/2$ y $V > 1/2$, la condición $V > U$ se satisface automáticamente. Entonces la región favorable es:
+
+$$U \in \left(0, \tfrac{1}{2}\right), \qquad V \in \left(\tfrac{1}{2},\ U + \tfrac{1}{2}\right)$$
+
+Calculamos su área en el cuadrado unitario:
+
+$$\int_0^{1/2} \int_{1/2}^{U + 1/2} dV\, dU = \int_0^{1/2} U\, dU = \frac{U^2}{2}\bigg|_0^{1/2} = \frac{1}{8}$$
+
+La región $\{U < V\}$ tiene área $\frac{1}{2}$, así que:
+
+$$P(\text{triángulo} \mid U < V) = \frac{1/8}{1/2} = \frac{1}{4}$$
+
+Por simetría, $P(\text{triángulo}) = \frac{1}{4}$.
+
+---
+
+**Enfoque 2 — Geométrico (el más elegante).**
+
+El vector $(a, b, c)$ con $a+b+c = 1$, $a,b,c \geq 0$ tiene distribución uniforme en el **símplex estándar** (triángulo equilátero con vértices en $(1,0,0)$, $(0,1,0)$, $(0,0,1)$).
+
+La región favorable $\{a < 1/2,\ b < 1/2,\ c < 1/2\}$ es el **triángulo medial**: el triángulo formado por los puntos medios de los lados del símplex, con vértices en $(\frac{1}{2}, \frac{1}{2}, 0)$, $(\frac{1}{2}, 0, \frac{1}{2})$, $(0, \frac{1}{2}, \frac{1}{2})$.
+
+El triángulo medial es semejante al original con razón $\frac{1}{2}$, por lo que su área es $\left(\frac{1}{2}\right)^2 = \frac{1}{4}$ la del símplex total.
+
+$$\boxed{P(\text{triángulo}) = \frac{1}{4}}$$
+
+Los tres triángulos "malos" (donde $a \geq \frac{1}{2}$, $b \geq \frac{1}{2}$, o $c \geq \frac{1}{2}$) son semejantes al símplex con razón $\frac{1}{2}$, cada uno con área $\frac{1}{4}$. No se solapan (no pueden dos segmentos ser simultáneamente $\geq \frac{1}{2}$, pues sumarían más que 1). Cubren $3 \times \frac{1}{4} = \frac{3}{4}$ del símplex, y el triángulo medial ocupa el $\frac{1}{4}$ restante.
+
+---
+
+#### Diagrama del símplex
+
+```
+(1,0,0)
+   /\
+  /  \   ← región mala: a ≥ 1/2
+ /----\
+(1/2 ,*)---(*,1/2)   ← triángulo medial (bueno): área = 1/4
+ \  /\/  /
+  \/  \/
+  /----\
+ /  \/  \
+(0,1,0)---(0,0,1)
+```
+
+Los tres triángulos de las esquinas (malos) tienen área $\frac{1}{4}$ cada uno. El triángulo central (bueno) también tiene área $\frac{1}{4}$.
+
+---
+
+#### Tabla de casos
+
+| Condición | Probabilidad |
+|:---|:---:|
+| $a \geq \frac{1}{2}$ (segmento izquierdo muy largo) | $\frac{1}{4}$ |
+| $b \geq \frac{1}{2}$ (segmento central muy largo) | $\frac{1}{4}$ |
+| $c \geq \frac{1}{2}$ (segmento derecho muy largo) | $\frac{1}{4}$ |
+| Ninguno $\geq \frac{1}{2}$ (triángulo posible) | $\frac{1}{4}$ |
+| **Total** | $1$ |
+
+Los cuatro casos son equiprobables y disjuntos (no pueden superponerse).
+
+---
+
+#### Generalización
+
+Si se eligen $n-1$ puntos uniformes en $[0,1]$ y se forman $n$ segmentos, la probabilidad de que formen un polígono de $n$ lados (usando la desigualdad generalizada: ningún lado supera la suma de los demás, equivalente a ningún lado $\geq \frac{1}{2}$) es:
+
+$$P = \frac{n}{2^{n-1}}$$
+
+Para $n = 3$: $P = \frac{3}{4}$... espera, eso es la probabilidad de que algún segmento supere $\frac{1}{2}$.
+
+Más precisamente, la probabilidad de que los $n$ segmentos formen un $n$-gon (condición: ningún lado $\geq$ suma de los demás $\Leftrightarrow$ ninguno $\geq \frac{1}{2}$) es:
+
+$$P(\text{n-gon}) = 1 - \frac{n}{2^{n-1}}$$
+
+Para $n=3$: $P = 1 - \frac{3}{4} = \frac{1}{4}$. ✓
+
 ---
 
 ## Ejercicio 16.
 Se eligen tres puntos aleatoriamente en un círculo. Estos determinan un triángulo, ¿cuál es la probabilidad de que el triángulo contenga al centro del círculo?
+
+### Solución
+
+#### ¿Por qué es sorprendente?
+
+La intuición dice que el centro está "adentro" del círculo, y los puntos también, así que debería ser probable que el triángulo lo encierre. Pero la respuesta es solo $\frac{1}{4}$ — la misma que el Ejercicio 15.
+
+Esto no es coincidencia: ambos problemas son esencialmente el mismo, y la condición que falla en cada caso es idéntica.
+
+---
+
+#### Idea clave: el centro queda adentro ↔ ningún semicírculo contiene los tres puntos
+
+El centro $O$ está dentro del triángulo si y solo si, al pararse en $O$ y mirar hacia cada vértice, los tres vértices "rodean" los 360°. Equivalentemente:
+
+$$\text{centro adentro} \iff \text{ningún semicírculo abierto contiene los tres puntos}$$
+
+$$\iff \text{los tres arcos determinados por los puntos son todos} < \pi$$
+
+Esta segunda equivalencia conecta directamente con el Ejercicio 15: los tres arcos $(a, b, c)$ con $a + b + c = 2\pi$ son uniformes en el símplex escalado, y la condición "todos $< \pi$" es "todos $< \frac{1}{2}$ del total". Eso tiene probabilidad $\frac{1}{4}$.
+
+---
+
+#### Resolución — Enfoque 1: reducción al Ejercicio 15
+
+Los tres puntos $P_1, P_2, P_3$ uniformes en el círculo determinan tres arcos de longitudes $a, b, c$ con $a + b + c = 2\pi$ y $(a/2\pi, b/2\pi, c/2\pi)$ uniforme en el símplex.
+
+La condición para que el centro esté adentro es $a < \pi$, $b < \pi$, $c < \pi$, es decir, cada arco es menor que la mitad de la circunferencia. Esto es exactamente la condición del Ejercicio 15 con los segmentos siendo $a/2\pi$, $b/2\pi$, $c/2\pi$ y el umbral $\frac{1}{2}$:
+
+$$\boxed{P(\text{centro adentro}) = \frac{1}{4}}$$
+
+---
+
+#### Resolución — Enfoque 2: el argumento del semicírculo (más elegante)
+
+Para cada punto $P_i$, definimos el evento:
+
+$$A_i = \{\text{el semicírculo abierto que comienza en } P_i \text{ (sentido antihorario) contiene a los otros dos}\}$$
+
+**¿Por qué los $A_i$ son disjuntos a.s.?** Si todos los puntos están en algún semicírculo, hay un único punto $P_i$ que es el "extremo inicial" del semicírculo cobertor mínimo. Ese es el único $A_i$ que puede ocurrir. Los tres eventos $A_1, A_2, A_3$ cubren todos los casos posibles en que los puntos están en algún semicírculo.
+
+**¿Cuánto vale $P(A_i)$?** Fijado $P_i$, cada uno de los otros dos puntos cae independientemente en el semicírculo $[P_i, P_i + \pi)$ con probabilidad $\frac{1}{2}$:
+
+$$P(A_i) = \left(\frac{1}{2}\right)^2 = \frac{1}{4}$$
+
+**Probabilidad de que los tres estén en algún semicírculo:**
+
+$$P(A_1 \cup A_2 \cup A_3) = P(A_1) + P(A_2) + P(A_3) = 3 \times \frac{1}{4} = \frac{3}{4}$$
+
+Por lo tanto:
+
+$$\boxed{P(\text{centro adentro}) = 1 - \frac{3}{4} = \frac{1}{4}}$$
+
+---
+
+#### Verificación directa por coordenadas
+
+Fijamos $P_1$ en el ángulo $0$. Los otros dos ángulos $\alpha$ (de $P_2$) y $\beta$ (de $P_3$) son uniformes en $[0, 2\pi)$. Suponemos $0 < \alpha < \beta < 2\pi$ (caso simétrico). Los tres arcos son $\alpha$, $\beta - \alpha$, $2\pi - \beta$. La condición es:
+
+$$\alpha < \pi, \qquad \beta - \alpha < \pi, \qquad \beta > \pi$$
+
+Con $U = \alpha/(2\pi)$ y $V = \beta/(2\pi)$, esto se convierte exactamente en:
+
+$$U < \tfrac{1}{2}, \qquad V - U < \tfrac{1}{2}, \qquad V > \tfrac{1}{2}$$
+
+Que es el mismo cálculo del Ejercicio 15, con resultado $\frac{1}{4}$. ✓
+
+---
+
+#### Conexión con Ejercicio 15
+
+| | Ejercicio 15 | Ejercicio 16 |
+|:---|:---:|:---:|
+| Objeto | Segmento $[0,1]$ | Círculo |
+| Puntos | 2 puntos aleatorios | 3 puntos aleatorios |
+| Piezas | 3 segmentos $a+b+c=1$ | 3 arcos $a+b+c=2\pi$ |
+| Condición | $a,b,c < \frac{1}{2}$ | $a,b,c < \pi$ |
+| Significado | Triángulo posible | Centro adentro |
+| Probabilidad | $\frac{1}{4}$ | $\frac{1}{4}$ |
+
+Ambos problemas son instancias del mismo fenómeno: tres piezas aleatorias (uniformes en el símplex) y la condición de que ninguna supere la mitad del total.
+
+---
+
+#### Generalización
+
+Para $n$ puntos en un círculo y la condición de que ningún semicírculo los contenga a todos:
+
+$$P(\text{ningún semicírculo los contiene}) = 1 - \frac{n}{2^{n-1}}$$
+
+| $n$ puntos | $P(\text{centro adentro del polígono})$ |
+|:---:|:---:|
+| 3 | $\frac{1}{4} = 25\%$ |
+| 4 | $\frac{1}{2} = 50\%$ |
+| 5 | $\frac{11}{16} \approx 68.75\%$ |
+| $n$ grande | $\to 1$ |
+
+Con más puntos, el polígono cubre más y es más probable que encierre el centro.
 
 ---
 
