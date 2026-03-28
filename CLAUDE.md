@@ -28,6 +28,14 @@ Help resolve practical exercises (prácticas) using the theoretical material and
 - When a concept is needed, explain it briefly before applying it.
 - Answers should be in Spanish unless the user writes in English.
 
+## File Editing Performance
+
+When inserting or appending content to a specific section of a file:
+
+- Use `Read` with `limit` (and `offset` if needed) to read only the lines around the target section — never read the full file.
+- Use `Edit` with the exact boundary string between the target section and the next one to insert precisely.
+- This applies especially when adding exercise solutions: read just enough to find the insertion point, then edit.
+
 ## PDF to Markdown Conversion
 
 When asked to parse a PDF and generate a Markdown file:

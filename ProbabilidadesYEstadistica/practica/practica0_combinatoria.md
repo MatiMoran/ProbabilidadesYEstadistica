@@ -21,11 +21,117 @@ d) Beto tiene que decidir los resultados de un concurso, en el que participan 7 
 
 e) Ana tiene 7 libros distintos y tiene que elegir 2 libros para llevárselos de viaje. ¿De cuántas maneras puede hacerlo?
 
+### Resolución — Ejercicio 1
+
+Todos los ítems son variaciones del **principio multiplicativo**: si una decisión tiene $p$ opciones y otra tiene $q$ opciones independientes, la cantidad total de formas de tomar ambas decisiones es $p \cdot q$.
+
+La clave está en identificar si el orden importa y si se puede repetir.
+
+---
+
+**a) Mesa y silla — producto simple**
+
+¿Por qué es interesante? Puede parecer que hay "7 opciones" en total, pero mesa y silla son objetos distintos y cada uno se pinta independientemente.
+
+**Idea clave:** principio multiplicativo. Hay 7 opciones para la mesa y 7 para la silla (se puede repetir color).
+
+$$7 \times 7 = 7^2 = \boxed{49}$$
+
+---
+
+**b) 7 pares de medias en 2 cajones**
+
+Cada par de medias va al cajón rojo o al cajón azul: 2 opciones por par, de forma independiente.
+
+$$\underbrace{2 \times 2 \times \cdots \times 2}_{7} = 2^7 = \boxed{128}$$
+
+---
+
+**c) Caramelos para 7 nietos**
+
+Cada nieto recibe un caramelo de naranja o de limón: 2 opciones por nieto.
+
+$$2^7 = \boxed{128}$$
+
+> Nota: es exactamente la misma estructura que b). Ambos son "asignar una de 2 opciones a cada uno de 7 elementos".
+
+---
+
+**d) Primer y segundo puesto entre 7 personas**
+
+**Idea clave:** variaciones sin repetición. El primero puede ser cualquiera de las 7 personas; el segundo, cualquiera de las 6 restantes. El **orden importa** (primero ≠ segundo).
+
+$$7 \times 6 = \boxed{42}$$
+
+Esto es un caso de variaciones sin repetición: $V(n, k) = \frac{n!}{(n-k)!}$, aquí con $n=7, k=2$.
+
+---
+
+**e) Elegir 2 libros de 7 para el viaje**
+
+**Idea clave:** combinaciones. A diferencia de d), aquí el orden **no importa** (llevar el libro A y el B es lo mismo que llevar B y A).
+
+$$\binom{7}{2} = \frac{7!}{2!\,5!} = \frac{7 \times 6}{2} = \boxed{21}$$
+
+---
+
+**Tabla resumen — comparación de los cinco ítems**
+
+| Ítem | ¿Orden importa? | ¿Repetición? | Fórmula | Resultado |
+|------|----------------|--------------|---------|-----------|
+| a)   | Sí (mesa ≠ silla) | Sí | $7^2$ | 49 |
+| b)   | No (medias iguales) | Sí | $2^7$ | 128 |
+| c)   | Sí (nieto 1 ≠ nieto 2) | Sí | $2^7$ | 128 |
+| d)   | Sí (1° ≠ 2°) | No | $7 \times 6$ | 42 |
+| e)   | No | No | $\binom{7}{2}$ | 21 |
+
+**Generalización:** estos cinco ítems cubren los cuatro casos fundamentales de conteo:
+
+| | Sin repetición | Con repetición |
+|---|---|---|
+| **Orden importa** | $\frac{n!}{(n-k)!}$ | $n^k$ |
+| **Orden no importa** | $\binom{n}{k}$ | $\binom{n+k-1}{k}$ |
+
 ---
 
 ## Ejercicio 2
 
 ¿De cuántas formas distintas pueden acomodarse 13 personas en una fila? ¿Y en una ronda?
+
+### Resolución — Ejercicio 2
+
+**¿Por qué es interesante?** La fila parece sencilla, pero la ronda genera una trampa: en un círculo no hay "primera posición", entonces muchos arreglos que parecen distintos son en realidad el mismo.
+
+---
+
+**Fila**
+
+**Idea clave:** permutaciones. Hay 13 lugares distinguibles (el primero, el segundo, ..., el último). El primer lugar puede ocuparlo cualquiera de las 13 personas, el segundo cualquiera de las 12 restantes, y así sucesivamente.
+
+$$13 \times 12 \times 11 \times \cdots \times 1 = 13! = \boxed{6{,}227{,}020{,}800}$$
+
+---
+
+**Ronda**
+
+**Idea clave:** permutaciones circulares. En una ronda, rotar a todos una posición produce el mismo arreglo. Por lo tanto, fijamos a una persona como referencia y permutamos a las 12 restantes.
+
+$$\frac{13!}{13} = 12! = \boxed{479{,}001{,}600}$$
+
+**¿Por qué dividimos por 13?** Cada arreglo circular corresponde a exactamente 13 arreglos lineales distintos (las 13 rotaciones posibles). Al dividir eliminamos esas repeticiones.
+
+---
+
+**Generalización**
+
+Para $n$ personas:
+
+| Disposición | Fórmula | Intuición |
+|---|---|---|
+| Fila | $n!$ | $n$ posiciones distinguibles |
+| Ronda | $(n-1)!$ | Se fija 1 persona; se permutan las $n-1$ restantes |
+
+$$\text{Ronda}(n) = \frac{n!}{n} = (n-1)!$$
 
 ---
 
@@ -34,6 +140,43 @@ e) Ana tiene 7 libros distintos y tiene que elegir 2 libros para llevárselos de
 a) De un grupo de 35 deportistas se necesita elegir 5 para participar de una competencia. ¿De cuántas formas distintas puede hacerse? ¿Qué cambia si esos cinco representantes a su vez cumplen cinco funciones distintas?
 
 b) Generalizar el ítem anterior para el caso de $n$ deportistas y $k$ representantes.
+
+### Resolución — Ejercicio 3
+
+**¿Por qué es interesante?** La trampa clásica: ¿importa el orden en que elegimos? Elegir al equipo {Ana, Bruno, Carlos, Diana, Eva} es lo mismo sin importar el orden de selección — pero si cada uno tiene un rol distinto, de repente sí importa quién ocupa cada función.
+
+---
+
+**a) Sin funciones distintas — combinaciones**
+
+**Idea clave:** combinaciones. Solo importa *quiénes* van, no el orden.
+
+De 35 deportistas elegimos 5 sin importar el orden:
+
+$$\binom{35}{5} = \frac{35!}{5!\,30!} = \frac{35 \times 34 \times 33 \times 32 \times 31}{5!} = \frac{33{,}891{,}840}{120} = \boxed{324{,}632}$$
+
+**Con funciones distintas — variaciones sin repetición**
+
+Ahora sí importa el orden: hay que asignar 5 roles distintos a 5 personas distintas. Esto es una permutación de 5 entre 35.
+
+$$V(35, 5) = \frac{35!}{30!} = 35 \times 34 \times 33 \times 32 \times 31 = \boxed{33{,}891{,}840}$$
+
+Notar que $V(35,5) = \binom{35}{5} \times 5!$: primero elegimos quiénes van ($\binom{35}{5}$) y luego asignamos los 5 roles entre ellos ($5!$).
+
+---
+
+**b) Generalización para $n$ deportistas y $k$ representantes**
+
+| Caso | Fórmula | Nombre |
+|---|---|---|
+| Sin roles distintos (orden no importa) | $\dbinom{n}{k} = \dfrac{n!}{k!\,(n-k)!}$ | Combinaciones |
+| Con $k$ roles distintos (orden importa) | $V(n,k) = \dfrac{n!}{(n-k)!}$ | Variaciones sin repetición |
+
+La relación entre ambas:
+
+$$V(n,k) = \binom{n}{k} \cdot k!$$
+
+**Intuición:** para construir una variación, primero elegimos el subconjunto de $k$ elementos ($\binom{n}{k}$ formas) y luego los ordenamos ($k!$ formas).
 
 ---
 
