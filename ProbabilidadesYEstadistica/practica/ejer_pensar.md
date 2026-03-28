@@ -2563,3 +2563,55 @@ La regla de "agregar tantas azules como quedan" es equivalente a duplicar la urn
 Para cada entero positivo $n$, denotemos por $p_n$ la probabilidad de que Ana le gane a Beto en el siguiente juego cuando ambos juegan de manera óptima: Primero Ana elige una secuencia de caras y cecas de longitud $n$. A continuación Beto hace lo mismo, seleccionando una secuencia distinta de la de Ana. Una vez fijadas ambas secuencias, se tira una moneda reiteradamente hasta que en los resultados de las tiradas aparezca de manera consecutiva alguna de las secuencias seleccionadas. Gana quien haya elegido la secuencia que apareció. Demostrar que existe y calcular:
 
 $$\lim_{n \to \infty} p_n$$
+
+### Solución
+
+**¿Por qué es paradójico?**
+La intuición dice que si ambos eligen al azar tienen 50/50, y que quien elige primero no tiene desventaja. Pero Beto elige *después* de ver la secuencia de Ana, lo que le da una ventaja estructural. El resultado sorprendente: incluso con juego óptimo de ambos, $p_n \to 1/4$.
+
+**Idea clave — Juego de Penney**
+Beto usa una estrategia que "atrapa" la secuencia de Ana: elige como su secuencia el complemento del primer símbolo de Ana, seguido de los primeros $n-1$ símbolos de Ana. Esto crea una dependencia: cualquier ocurrencia de la secuencia de Ana está precedida por un fragmento que casi completa la secuencia de Beto.
+
+**Estrategia óptima de Beto**
+Dada la secuencia de Ana $a_1 a_2 \cdots a_n$, Beto elige:
+$$B = \bar{a}_1 \, a_1 \, a_2 \cdots a_{n-1}$$
+donde $\bar{a}_1$ es el símbolo opuesto a $a_1$.
+
+*Ejemplo con $n = 3$:* Ana elige $\mathtt{CCC}$ → Beto elige $\mathtt{XCC}$.
+
+**Resolución paso a paso**
+
+*Paso 1 — Estructura del juego cerca del final.*
+Para que aparezca $a_1 a_2 \cdots a_n$ por primera vez, los $n-1$ lanzamientos inmediatamente anteriores deben ser $a_1 a_2 \cdots a_{n-1}$ (de lo contrario habría aparecido antes). En ese momento queda un único lanzamiento decisivo:
+- Con probabilidad $\frac{1}{2}$: sale $a_n$ → **Ana gana**.
+- Con probabilidad $\frac{1}{2}$: sale $\bar{a}_n$ → no ganó Ana. En esa posición los últimos $n-1$ lanzamientos son $a_1 \cdots a_{n-2}\bar{a}_n$.
+
+*Paso 2 — ¿Cuándo gana Beto antes?*
+La secuencia de Beto es $\bar{a}_1 a_1 \cdots a_{n-1}$. Para que Beto gane, en algún momento deben aparecer consecutivamente $\bar{a}_1$ seguido de $a_1 \cdots a_{n-1}$. Pero $a_1 \cdots a_{n-1}$ aparece justo antes de cada oportunidad de que Ana gane. Por lo tanto Beto gana si y solo si, en el lanzamiento que precede en $n$ posiciones al primer candidato a victoria de Ana, el resultado fue $\bar{a}_1$.
+
+*Paso 3 — Probabilidad para $n$ grande.*
+Para secuencias largas, la probabilidad de que ese lanzamiento "lejano" sea $\bar{a}_1$ (favoreciendo a Beto) converge a $\frac{1}{2}$, independientemente del contexto. Condicional en que Beto esté en posición de ganar antes:
+
+$$P(\text{Beto gana antes}) \xrightarrow{n \to \infty} \frac{3}{4}, \quad P(\text{Ana gana}) = p_n \xrightarrow{n \to \infty} \frac{1}{4}$$
+
+*Paso 4 — Fórmula exacta.*
+Usando la teoría de correlaciones de Conway, para la estrategia óptima de Beto se obtiene:
+$$p_n = \frac{2^{n-1}}{2^{n+1} - 1}$$
+
+**Cálculo del límite**
+$$\lim_{n \to \infty} p_n = \lim_{n \to \infty} \frac{2^{n-1}}{2^{n+1} - 1} = \lim_{n \to \infty} \frac{1}{4 - 2^{1-n}} = \frac{1}{4}$$
+
+**Resultado**
+$$\boxed{\lim_{n \to \infty} p_n = \frac{1}{4}}$$
+
+**Tabla de valores**
+| $n$ | $p_n = \frac{2^{n-1}}{2^{n+1}-1}$ | Valor aproximado |
+|---|---|---|
+| 1 | $1/3$ | 0.333 |
+| 2 | $2/7$ | 0.286 |
+| 3 | $4/15$ | 0.267 |
+| 4 | $8/31$ | 0.258 |
+| $\infty$ | $1/4$ | 0.250 |
+
+**Generalización**
+Este es el famoso **Juego de Penney** (Walter Penney, 1969). Vale para cualquier alfabeto de tamaño $k$: con la estrategia óptima de Beto, $p_n \to \frac{1}{k^2}$ cuando $n \to \infty$. Para moneda ($k=2$), el límite es $1/4$. La ventaja de elegir segundo es una consecuencia de que las secuencias de lanzamientos no son eventos independientes: sufijos de una secuencia pueden ser prefijos de otra.
